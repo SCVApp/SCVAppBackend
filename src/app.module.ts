@@ -16,8 +16,8 @@ import { env } from 'process';
     SessionModule.forRoot({
       session: {
         secret:`${env.SESSION_SECRET}`,
-        resave: true,
-        saveUninitialized: true,
+        resave: false,
+        saveUninitialized: false,
       }
     })
   ],
