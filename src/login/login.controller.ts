@@ -60,8 +60,12 @@ export class LoginController{
         session.save()
         session.cookie.expires = false;
         if(state == "appscv"){//app.scv.si
+            res.setHeader('Access-Control-Allow-Origin',"http://app.scv.si/")
+            res.setHeader('Access-Control-Allow-Credentials','true')
             return res.redirect("http://app.scv.si/")
         }else if(state == "localhost"){//localhost
+            res.setHeader('Access-Control-Allow-Origin',"http://localhost:3000/")
+            res.setHeader('Access-Control-Allow-Credentials','true')
             return res.redirect("http://localhost:3000/")
         }
         return res.json(token);
