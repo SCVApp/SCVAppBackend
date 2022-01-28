@@ -1,5 +1,5 @@
-import { Controller, Get, HttpCode, Query, Redirect, Session } from "@nestjs/common";
-import { query } from "express";
+import { Controller, Get, HttpCode, Query, Redirect, Session, Headers, Res } from "@nestjs/common";
+import { Response } from "express";
 import { env } from "process";
 import { LoginService } from "./login.service";
 import * as msal from "@azure/msal-node"
@@ -12,15 +12,31 @@ export class LoginController{
 
     @Get('/authUrl/')
     @Redirect('/', 302)
-    getAuthUrl(){
-        return this.loginService.getAuthUrl()
+    getAuthUrl(@Headers() headers){
+        let referer = headers.referer
+        let name = "app"
+        switch(referer){
+            case 'http://localhost:3000/':
+                name = "localhost"
+                break;
+            case 'http://app.scv.si/':
+                name = "appscv"
+                break;
+            case 'https://app.scv.si/':
+                name = "appscv"
+                break;
+        }
+        let state = `${name}`
+        return this.loginService.getAuthUrl(state)
     }
 
     @Get("/redirect/")
-    async redirect(@Query() query, @Session() session){
+    async redirect(@Query() query, @Session() session, @Res() res:Response){
         let code = query.code || ""
+        let state = query.state || ""
+
         if(code == ""){
-            return
+            return res.send({})
         }
 
         const tokenRequest = {
@@ -40,6 +56,11 @@ export class LoginController{
             expiresOn:respons.expiresOn,
         }
         session.token = token
-        return this.loginService.responsOk(), session;
+        if(state == "appscv"){//app.scv.si
+            return res.redirect("http://app.scv.si/")
+        }else if(state == "localhost"){//localhost
+            return res.redirect("http://localhost:3000/")
+        }
+        return res.json(token);
     }
 }

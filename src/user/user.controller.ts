@@ -54,8 +54,14 @@ export class UserController{
         // return data
     }
     @Get("/logout/")
-    logoutUser(@Session() session){
-        session = {}
-        return session
+    logoutUser(@Session() session, @Headers() headers,@Res() res:Response){
+        session.token = undefined
+        let referer = headers.referer
+        if(referer == "http://localhost:3000/"){
+            return res.redirect("http://localhost:3000/")
+        }else if(referer == "http://app.scv.si/" || referer == "https://app.scv.si/"){
+            return res.redirect("http://app.scv.si/")
+        }
+        return res.send("logout")
     }
 }
