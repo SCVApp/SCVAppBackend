@@ -8,12 +8,13 @@ import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { SearchController } from './search/seacrh.controller';
 import { SearchSerivce } from './search/search.service';
+import { env } from 'process';
 
 
 @Module({
   imports: [
     SessionModule.forRoot({
-      session: {secret:'testing'}
+      session: {secret:env.SESSION_SECRET}
     })
   ],
   controllers: [AppController,LoginController,UserController,SearchController],
