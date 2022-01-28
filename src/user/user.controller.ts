@@ -27,6 +27,7 @@ export class UserController{
         const client = this.userService.getClient(accessToken)
         let data = await client.api("/me").get()
         session.token = token
+        session.save()
 
         
         return res.status(HttpStatus.OK).json(data)

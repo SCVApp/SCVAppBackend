@@ -5,6 +5,7 @@ import { LoginService } from "./login.service";
 import * as msal from "@azure/msal-node"
 
 import clientApplication from "src/application/clientApplication";
+import { FastifyReply } from "fastify";
 
 @Controller('auth')
 export class LoginController{
@@ -56,6 +57,7 @@ export class LoginController{
             expiresOn:respons.expiresOn,
         }
         session.token = token
+        session.save()
         if(state == "appscv"){//app.scv.si
             return res.redirect("http://app.scv.si/")
         }else if(state == "localhost"){//localhost

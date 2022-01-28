@@ -14,7 +14,11 @@ import { env } from 'process';
 @Module({
   imports: [
     SessionModule.forRoot({
-      session: {secret:`${env.SESSION_SECRET}`}
+      session: {
+        secret:`${env.SESSION_SECRET}`,
+        resave: true,
+        saveUninitialized: true,
+      }
     })
   ],
   controllers: [AppController,LoginController,UserController,SearchController],
