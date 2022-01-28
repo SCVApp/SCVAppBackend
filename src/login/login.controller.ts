@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Query, Redirect } from "@nestjs/common";
+import { Controller, Get, HttpCode, Query, Redirect, Session } from "@nestjs/common";
 import { query } from "express";
 import { env } from "process";
 import { LoginService } from "./login.service";
@@ -17,22 +17,29 @@ export class LoginController{
     }
 
     @Get("/redirect/")
-    @HttpCode(200)
-    async redirect(@Query() query){
+    async redirect(@Query() query, @Session() session){
         let code = query.code || ""
         if(code == ""){
             return
         }
 
         const tokenRequest = {
-            // The URL from the redirect will contain the Auth Code in the query parameters
             code: code,
             scopes: env.OAUTH_SCOPES.split(" "),
             redirectUri: env.OAUTH_REDIRECT_URI,
+            accessType: "offline",
         };
-
         let respons = await clientApplication.acquireTokenByCode(tokenRequest)
-        console.log(respons)
-        
+        // session.user = respons
+        const tokenCache = clientApplication.getTokenCache().serialize()
+        const refreshTokenObject = (JSON.parse(tokenCache)).RefreshToken
+        const refreshToken = refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;
+        const token = {
+            accessToken: respons.accessToken,
+            refreshToken: refreshToken,
+            expiresOn:respons.expiresOn,
+        }
+        session.token = token
+        return this.loginService.responsOk(), session;
     }
 }

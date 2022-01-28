@@ -1,8 +1,5 @@
 import {LogLevel, ConfidentialClientApplication} from "@azure/msal-node"
 import { env } from "process";
-import * as dotenv from "dotenv"
-
-dotenv.config()
 
 const config = {
     auth: {

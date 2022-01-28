@@ -14,4 +14,8 @@ export class LoginService{
         let url = await clientApplication.getAuthCodeUrl(authCodeUrlParameters)
         return {url:url}
     }
+
+    responsOk(){
+        return "ok"
+    }
 }
