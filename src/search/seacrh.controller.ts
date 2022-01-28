@@ -37,31 +37,31 @@ export class SearchController{
         return res.json(data)
     }
 
-    @Get("/specificUser/:id")
-    async searchSpecificUser(@Session() session, @Headers() headers, @Res() res:Response,@Param('id') id:string){
-        res.setHeader('Access-Control-Allow-Methods','GET')
-        res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
-        res.setHeader('Access-Control-Allow-Credentials','true')
-        //API url: 
-        if(!session.token){
-            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
-        }
-        let token = await getToken(session.token) || ""
-        if(token == ""){
-            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
-        }
-        if(id == ""){
-            return res.json({})
-        }
+    // @Get("/specificUser/:id")
+    // async searchSpecificUser(@Session() session, @Headers() headers, @Res() res:Response,@Param('id') id:string){
+    //     res.setHeader('Access-Control-Allow-Methods','GET')
+    //     res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
+    //     res.setHeader('Access-Control-Allow-Credentials','true')
+    //     //API url: 
+    //     if(!session.token){
+    //         return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+    //     }
+    //     let token = await getToken(session.token) || ""
+    //     if(token == ""){
+    //         return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+    //     }
+    //     if(id == ""){
+    //         return res.json({})
+    //     }
         
 
-        let accessToken = (<any>token).accessToken || ""
-        const client = this.userService.getClient(accessToken)
+    //     let accessToken = (<any>token).accessToken || ""
+    //     const client = this.userService.getClient(accessToken)
 
-        let searchUrl = ``
+    //     let searchUrl = ``
 
-        let data = await client.api(searchUrl).get()
+    //     let data = await client.api(searchUrl).get()
 
-        return res.json({})
-    }
+    //     return res.json({})
+    // }
 }
