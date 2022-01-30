@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { LoginController } from './login/login.controller';
 import { LoginService } from './login/login.service';
 import { SessionModule } from 'nestjs-session';
@@ -16,12 +15,10 @@ import { env } from 'process';
     SessionModule.forRoot({
       session: {
         secret:`${env.SESSION_SECRET}`,
-        resave: false,
-        saveUninitialized: false,
-      }
+      },
     })
   ],
   controllers: [AppController,LoginController,UserController,SearchController],
-  providers: [AppService,LoginService,UserService,SearchSerivce],
+  providers: [LoginService,UserService,SearchSerivce],
 })
 export class AppModule {}
