@@ -1,10 +1,12 @@
-import { Controller, Get, HttpStatus, Res, Session , Headers} from "@nestjs/common";
+import { Controller, Get, HttpStatus, Res, Session , Headers, Param} from "@nestjs/common";
 import { UserService } from "./user.service";
 import { Response } from "express";
 import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
 
 import getToken from "src/application/token";
 import { blob } from "stream/consumers";
+import { env } from "process";
+import { doesNotMatch } from "assert";
 
 @Controller('user')
 export class UserController{
@@ -50,11 +52,19 @@ export class UserController{
 
         let accessToken = (<any>token).accessToken || ""
         const client = this.userService.getClient(accessToken)
-        const data = await client.api("/me/photo/$value").responseType(ResponseType.ARRAYBUFFER).get()
-
-        let buffer = Buffer.from(data,'base64')
-        res.setHeader("content-type","image/jpeg")
-        return res.send(buffer)
+        let data
+        try{
+            data = await client.api("/me/photo/$value").responseType(ResponseType.ARRAYBUFFER).get()
+        }catch(err){
+            return res.sendFile(`${process.cwd()}/src/pictures/profilePicture.svg`)
+        }
+        if(data){
+            let buffer = Buffer.from(data,'base64')
+            res.setHeader("content-type","image/jpeg")
+            res.send(buffer)
+        }else{
+            return res.send("no foto")
+        }
     }
     @Get("/logout/")
     logoutUser(@Session() session, @Headers() headers,@Res() res:Response){
@@ -68,7 +78,7 @@ export class UserController{
         return res.send("logout")
     }
 
-    @Get("school")
+    @Get("/school/")
     async getUsersSchoolData(@Session() session, @Headers() headers,@Res() res:Response){
         res.setHeader('Access-Control-Allow-Methods','GET')
         res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
@@ -88,5 +98,67 @@ export class UserController{
         let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0)
         
         return res.send(razred.displayName)
+    }
+
+    @Get("/setStatus/:status")
+    async setUserSatus(@Session() session, @Headers() headers,@Res() res:Response,@Param('status') status:string){
+        res.setHeader('Access-Control-Allow-Methods','GET')
+        res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
+        res.setHeader('Access-Control-Allow-Credentials','true')
+
+        if(!session.token){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+        let token = await getToken(session.token) || ""
+        if(token == ""){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+
+        let accessToken = (<any>token).accessToken || ""
+        const client = this.userService.getClient(accessToken)
+
+        let availability = ""
+        let activity = ""
+
+        switch(status.toLowerCase()){
+            case "available":
+                availability="Available"
+                activity="Available"
+                break;
+            case "busy":
+                availability="Busy"
+                activity="Busy"
+                break;
+            case "dnd":
+                availability="DoNotDisturb"
+                activity="DoNotDisturb"
+                break;
+            case "brb":
+                availability="BeRightBack"
+                activity="BeRightBack"
+                break;
+            case "away":
+                availability="Away"
+                activity="Away"
+                break;
+            case "offline":
+                availability="Offline"
+                activity="OffWork"
+                break;
+        }
+
+
+        if(availability == "" || activity == ""){
+            return res.status(400).send("Not selected status")
+        }
+
+        let postData={
+            sessionId: `${env.OAUTH_APP_ID}`,
+            availability: availability,
+            activity: activity
+        }
+
+        const data = await client.api("/me/presence/setUserPreferredPresence").version("beta").post(postData)
+        res.send("ok")
     }
 }
