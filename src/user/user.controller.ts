@@ -4,9 +4,9 @@ import { Response } from "express";
 import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
 
 import getToken from "src/application/token";
-import { blob } from "stream/consumers";
 import { env } from "process";
-import { doesNotMatch } from "assert";
+import console from "console";
+import { readFile } from "fs/promises";
 
 @Controller('user')
 export class UserController{
@@ -96,8 +96,19 @@ export class UserController{
         const client = this.userService.getClient(accessToken)
         const data = await client.api("/me/memberOf?$select=groupTypes,mailEnabled,securityEnabled,displayName").responseType(ResponseType.JSON).get()
         let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0)
-        
-        return res.send(razred.displayName)
+        if(!razred){
+            return res.send("error")
+        }
+
+        let eASchoolsLinksText = (await readFile(`${process.cwd()}/src/schoolData/eaLinksOfSchools.json`)).toString()
+        let eASchoolsLinks = JSON.parse(eASchoolsLinksText).schools
+
+
+        // eASchoolsLinks.forEach(element => {
+        //     // console.log(element)
+        // });
+
+        return res.send(eASchoolsLinks)
     }
 
     @Get("/setStatus/:status")
@@ -160,5 +171,73 @@ export class UserController{
 
         const data = await client.api("/me/presence/setUserPreferredPresence").version("beta").post(postData)
         res.send("ok")
+    }
+
+    @Get("/get/status")
+    async getUserStatus(@Session() session, @Headers() headers,@Res() res:Response){
+        res.setHeader('Access-Control-Allow-Methods','GET')
+        res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
+        res.setHeader('Access-Control-Allow-Credentials','true')
+
+        if(!session.token){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+        let token = await getToken(session.token) || ""
+        if(token == ""){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+
+        let accessToken = (<any>token).accessToken || ""
+        const client = this.userService.getClient(accessToken)
+
+        const data = await client.api("/me/presence").version("beta").responseType(ResponseType.JSON).get()
+        
+        let availability = data.availability
+
+        let statusData = {
+            display:"Unknown",
+            color:"#ffffff"
+        }
+
+        switch(availability.toLowerCase()){
+            case "available":
+                statusData = {
+                    display:"Dosegljiv/-a",
+                    color:"#90C35C"
+                }
+                break;
+            case "busy":
+                statusData = {
+                    display:"Zaseden/-a",
+                    color:"#D64E58"
+                }
+                break;
+            case "donotdisturb":
+                statusData = {
+                    display:"Ne motite",
+                    color:"#D64E58"
+                }
+                break;
+            case "berightback":
+                statusData = {
+                    display:"Takoj bom nazaj",
+                    color:"#FBBC39"
+                }
+                break;
+            case "away":
+                statusData = {
+                    display:"Odsoten",
+                    color:"#FBBC39"
+                }
+                break;
+            case "offline":
+                statusData = {
+                    display:"Nedosegljiv/-a",
+                    color:"#747474"
+                }
+                break;
+        }
+
+        res.json(statusData)
     }
 }

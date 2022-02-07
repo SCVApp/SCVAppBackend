@@ -1,0 +1,24 @@
+{
+    "schools":{
+        "ERS":{
+            "name":"Elektro in računalniška šola",
+            "urlStrani":"https://ers.scv.si/sl/",
+            "color":"#008DD3"
+        },
+        "GIM":{
+            "name":"Gimnazija",
+            "urlStrani":"https://gimnazija.scv.si/",
+            "color":"#FFCA05"
+        },
+        "SSD":{
+            "name":"Šola za storitvene dejavnosti",
+            "urlStrani":"https://storitvena.scv.si/sl/",
+            "color":"#EE5BA0"
+        },
+        "SSGO":{
+            "name":"Šola za strojništvo, geotehniko in okolje",
+            "urlStrani":"https://ssgo.scv.si/sl/",
+            "color":"#A6CE39"
+        }
+    }
+}
