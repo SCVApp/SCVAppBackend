@@ -1,11 +1,10 @@
-import { Controller, Get, HttpStatus, Res, Session , Headers, Param} from "@nestjs/common";
+import { Controller, Get, HttpStatus, Res, Session , Headers, Param , Logger} from "@nestjs/common";
 import { UserService } from "./user.service";
 import { Response } from "express";
 import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
 
 import getToken from "src/application/token";
 import { env } from "process";
-import console from "console";
 import { readFile } from "fs/promises";
 
 @Controller('user')
@@ -96,19 +95,43 @@ export class UserController{
         const client = this.userService.getClient(accessToken)
         const data = await client.api("/me/memberOf?$select=groupTypes,mailEnabled,securityEnabled,displayName").responseType(ResponseType.JSON).get()
         let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0)
+        
+        let selectedSchool = {
+            id:"SCV",
+            urnikUrl:"https://www.easistent.com/",
+            color:"#EC2D67",
+            schoolUrl:"https://www.scv.si/sl/",
+            name:"Šolski center Velenje"
+        }
+
         if(!razred){
-            return res.send("error")
+            return res.send(selectedSchool)
         }
 
         let eASchoolsLinksText = (await readFile(`${process.cwd()}/src/schoolData/eaLinksOfSchools.json`)).toString()
         let eASchoolsLinks = JSON.parse(eASchoolsLinksText).schools
 
 
-        // eASchoolsLinks.forEach(element => {
-        //     // console.log(element)
-        // });
+        eASchoolsLinks.forEach(school => {
+            let classes = Object.keys(school.classes)
+            if(classes.includes(razred.displayName)){
+                let id = school.classes[razred.displayName]
+                selectedSchool.id = school.id
+                selectedSchool.urnikUrl = `${school.mainLink}${id}`
+            }
+        });
 
-        return res.send(eASchoolsLinks)
+        let SchoolInfoText = (await readFile(`${process.cwd()}/src/schoolData/schoolInfo.json`)).toString()
+        let SchoolsInfo = JSON.parse(SchoolInfoText).schools
+
+        
+        if(Object.keys(SchoolsInfo).includes(selectedSchool.id)){
+            let schoolInfo = SchoolsInfo[selectedSchool.id]
+            selectedSchool.color = schoolInfo.color
+            selectedSchool.schoolUrl = schoolInfo.urlStrani
+            selectedSchool.name = schoolInfo.name
+        }
+        return res.send(selectedSchool)
     }
 
     @Get("/setStatus/:status")

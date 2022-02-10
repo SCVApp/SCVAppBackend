@@ -10,7 +10,8 @@ export class LoginService{
         const authCodeUrlParameters = {
             scopes: env.OAUTH_SCOPES.split(" "),
             redirectUri: env.OAUTH_REDIRECT_URI,
-            state:state
+            state:state,
+            prompt: 'select_account'
         };
         let url = await clientApplication.getAuthCodeUrl(authCodeUrlParameters)
         return {url:url}
