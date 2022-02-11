@@ -51,6 +51,8 @@ export class UserController{
 
         let accessToken = (<any>token).accessToken || ""
         const client = this.userService.getClient(accessToken)
+        session.token = token
+        session.save()
         let data
         try{
             data = await client.api("/me/photo/$value").responseType(ResponseType.ARRAYBUFFER).get()
@@ -92,16 +94,22 @@ export class UserController{
         }
 
         let accessToken = (<any>token).accessToken || ""
+        
         const client = this.userService.getClient(accessToken)
         const data = await client.api("/me/memberOf?$select=groupTypes,mailEnabled,securityEnabled,displayName").responseType(ResponseType.JSON).get()
+
+        session.token = token
+        session.save()
+
         let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0)
         
         let selectedSchool = {
             id:"SCV",
             urnikUrl:"https://www.easistent.com/",
-            color:"#EC2D67",
+            color:"#DF5350",
             schoolUrl:"https://www.scv.si/sl/",
-            name:"Šolski center Velenje"
+            name:"Šolski center Velenje",
+            razred:""
         }
 
         if(!razred){
@@ -118,6 +126,7 @@ export class UserController{
                 let id = school.classes[razred.displayName]
                 selectedSchool.id = school.id
                 selectedSchool.urnikUrl = `${school.mainLink}${id}`
+                selectedSchool.razred = razred.displayName
             }
         });
 
@@ -150,6 +159,9 @@ export class UserController{
 
         let accessToken = (<any>token).accessToken || ""
         const client = this.userService.getClient(accessToken)
+
+        session.token = token
+        session.save()
 
         let availability = ""
         let activity = ""
@@ -214,6 +226,9 @@ export class UserController{
         const client = this.userService.getClient(accessToken)
 
         const data = await client.api("/me/presence").version("beta").responseType(ResponseType.JSON).get()
+
+        session.token = token
+        session.save()
         
         let availability = data.availability
 
