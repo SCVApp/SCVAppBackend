@@ -218,6 +218,7 @@ export class UserController{
         let availability = data.availability
 
         let statusData = {
+            id:"Unknown",
             display:"Unknown",
             color:"#ffffff"
         }
@@ -225,36 +226,42 @@ export class UserController{
         switch(availability.toLowerCase()){
             case "available":
                 statusData = {
+                    id:"available",
                     display:"Dosegljiv/-a",
                     color:"#90C35C"
                 }
                 break;
             case "busy":
                 statusData = {
+                    id:"busy",
                     display:"Zaseden/-a",
                     color:"#D64E58"
                 }
                 break;
             case "donotdisturb":
                 statusData = {
+                    id:"dnd",
                     display:"Ne motite",
                     color:"#D64E58"
                 }
                 break;
             case "berightback":
                 statusData = {
+                    id:"brb",
                     display:"Takoj bom nazaj",
                     color:"#FBBC39"
                 }
                 break;
             case "away":
                 statusData = {
+                    id:"away",
                     display:"Odsoten",
                     color:"#FBBC39"
                 }
                 break;
             case "offline":
                 statusData = {
+                    id:"offline",
                     display:"Nedosegljiv/-a",
                     color:"#747474"
                 }
