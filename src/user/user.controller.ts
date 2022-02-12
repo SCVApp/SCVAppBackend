@@ -127,10 +127,9 @@ export class UserController{
                 selectedSchool.urnikUrl = `${school.mainLink}${id}`
                 selectedSchool.razred = razred.displayName
             }else{
-                let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && e.displayName == school.id)
+                let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && Object.keys(SchoolsInfo).includes(idSole))
                 if(idSole){
-                    selectedSchool.id = school.id
-                    selectedSchool.urnikUrl = `${school.mainLink}`
+                    selectedSchool.id = idSole
                 }
             }
         });
