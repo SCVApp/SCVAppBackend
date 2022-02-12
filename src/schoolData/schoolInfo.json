@@ -19,6 +19,16 @@
             "name":"Šola za strojništvo, geotehniko in okolje",
             "urlStrani":"https://ssgo.scv.si/sl/",
             "color":"#A6CE39"
+        },
+        "MIC":{
+            "name":"Medpodjetniško izobraževalni center",
+            "urlStrani":"https://mic.scv.si/sl/",
+            "color":"#ED1164"
+        },
+        "VSS":{
+            "name":"Višja strokovna šola",
+            "urlStrani":"https://vss.scv.si/sl/",
+            "color":"#8DD7F7"
         }
     }
 }

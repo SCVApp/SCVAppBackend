@@ -72,9 +72,9 @@ export class UserController{
         session.token = undefined
         let referer = headers.referer
         if(referer == "http://localhost:3000/"){
-            return res.redirect("http://localhost:3000/")
+            return res.redirect("http://localhost:3000/?success=logout")
         }else if(referer == "http://app.scv.si/" || referer == "https://app.scv.si/"){
-            return res.redirect("http://app.scv.si/")
+            return res.redirect("https://app.scv.si/?success=logout")
         }
         return res.send("logout")
     }
@@ -101,19 +101,18 @@ export class UserController{
         session.token = token
         session.save()
 
-        let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0)
+        let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0) || ""
+
+        let SchoolInfoText = (await readFile(`${process.cwd()}/src/schoolData/schoolInfo.json`)).toString()
+        let SchoolsInfo = JSON.parse(SchoolInfoText).schools
         
         let selectedSchool = {
             id:"SCV",
             urnikUrl:"https://www.easistent.com/",
-            color:"#DF5350",
+            color:"#FFFFFF",
             schoolUrl:"https://www.scv.si/sl/",
             name:"Šolski center Velenje",
             razred:""
-        }
-
-        if(!razred){
-            return res.send(selectedSchool)
         }
 
         let eASchoolsLinksText = (await readFile(`${process.cwd()}/src/schoolData/eaLinksOfSchools.json`)).toString()
@@ -127,13 +126,15 @@ export class UserController{
                 selectedSchool.id = school.id
                 selectedSchool.urnikUrl = `${school.mainLink}${id}`
                 selectedSchool.razred = razred.displayName
+            }else{
+                let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && e.displayName == school.id)
+                if(idSole){
+                    selectedSchool.id = school.id
+                    selectedSchool.urnikUrl = `${school.mainLink}`
+                }
             }
         });
 
-        let SchoolInfoText = (await readFile(`${process.cwd()}/src/schoolData/schoolInfo.json`)).toString()
-        let SchoolsInfo = JSON.parse(SchoolInfoText).schools
-
-        
         if(Object.keys(SchoolsInfo).includes(selectedSchool.id)){
             let schoolInfo = SchoolsInfo[selectedSchool.id]
             selectedSchool.color = schoolInfo.color

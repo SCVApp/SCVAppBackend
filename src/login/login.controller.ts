@@ -59,9 +59,9 @@ export class LoginController{
         session.token = token
         session.save()
         if(state == "appscv"){//app.scv.si
-            return res.redirect("http://app.scv.si/")
+            return res.redirect("https://app.scv.si/?success=signin")
         }else if(state == "localhost"){//localhost
-            return res.redirect("http://localhost:3000/")
+            return res.redirect("http://localhost:3000/?success=signin")
         }
         return res.json(token);
     }
