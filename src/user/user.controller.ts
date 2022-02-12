@@ -130,9 +130,7 @@ export class UserController{
                 let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && Object.keys(SchoolsInfo).includes(e.displayName))
                 if(idSole){
                     selectedSchool.id = idSole.displayName
-                    console.log(`Šola: ${idSole.displayName}`)
                 }
-                console.log("Nada")
             }
         });
 
