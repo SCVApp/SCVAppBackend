@@ -127,7 +127,7 @@ export class UserController{
                 selectedSchool.urnikUrl = `${school.mainLink}${id}`
                 selectedSchool.razred = razred.displayName
             }else{
-                let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && Object.keys(SchoolsInfo).includes(idSole))
+                let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && Object.keys(SchoolsInfo).includes(e.displayName))
                 if(idSole){
                     selectedSchool.id = idSole
                 }
