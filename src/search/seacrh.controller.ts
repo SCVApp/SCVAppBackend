@@ -1,3 +1,4 @@
+import { ResponseType } from "@microsoft/microsoft-graph-client/lib/src/ResponseType";
 import { Controller, Get, Param, Req, Session, Headers, Res, HttpStatus } from "@nestjs/common";
 import { Request, Response } from "express";
 import getToken from "src/application/token";
@@ -30,11 +31,13 @@ export class SearchController{
         let accessToken = (<any>token).accessToken || ""
         const client = this.userService.getClient(accessToken)
 
-        let searchUrl = `/me/people/?$search=${search}&$top=10&$filter=personType/class eq 'Person' and personType/subclass eq 'OrganizationUser'&$orderby=displayName&$select=displayName,scoredEmailAddresses,givenName,surname`
+        let searchUrl = `/users/?$filter=personType/class eq 'Person' and personType/subclass eq 'OrganizationUser'i`
 
-        let data = await client.api(searchUrl).get()
+        let data = await client.api(searchUrl).responseType(ResponseType.JSON).get()
 
-        return res.json(data)
+        let filter_data = data.value.filter(e=>e.displayName.includes(search))
+
+        return res.json(filter_data)
     }
 
     // @Get("/specificUser/:id")

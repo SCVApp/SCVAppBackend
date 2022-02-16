@@ -67,16 +67,22 @@ export class UserController{
             return res.send("no foto")
         }
     }
+
+    @Get("/logoutUrl/")
+    logoutUrl(@Res() res:Response){
+        res.redirect(`https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${env.OAUTH_REDIRECT_URI==="http://localhost:5050/auth/redirect/"?"http://localhost:5050/user/logout":"https://app.scv.si/user/logout"}`)
+    }
+
     @Get("/logout/")
     logoutUser(@Session() session, @Headers() headers,@Res() res:Response){
         session.token = undefined
-        let referer = headers.referer
-        if(referer == "http://localhost:3000/"){
+        let host = headers.host
+        if(host == "localhost:5050"){
             return res.redirect("http://localhost:3000/?success=logout")
-        }else if(referer == "http://app.scv.si/" || referer == "https://app.scv.si/"){
+        }else if(host == "scvapp-backend.herokuapp.com"){
             return res.redirect("https://app.scv.si/?success=logout")
         }
-        return res.send("logout")
+        return res.redirect("https://app.scv.si/?success=logout")
     }
 
     @Get("/school/")

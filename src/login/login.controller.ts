@@ -47,7 +47,6 @@ export class LoginController{
             accessType: "offline",
         };
         let respons = await clientApplication.acquireTokenByCode(tokenRequest)
-        // session.user = respons
         const tokenCache = clientApplication.getTokenCache().serialize()
         const refreshTokenObject = (JSON.parse(tokenCache)).RefreshToken
         const refreshToken = refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;
