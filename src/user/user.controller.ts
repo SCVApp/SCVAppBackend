@@ -70,7 +70,7 @@ export class UserController{
 
     @Get("/logoutUrl/")
     logoutUrl(@Res() res:Response){
-        res.redirect(`https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${env.OAUTH_REDIRECT_URI==="http://localhost:5050/auth/redirect/"?"http://localhost:5050/user/logout":"https://app.scv.si/user/logout"}`)
+        res.redirect(`https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${env.OAUTH_REDIRECT_URI==="http://localhost:5050/auth/redirect/"?"http://localhost:5050/user/logout":"https://scvapp-backend.herokuapp.com/user/logout"}`)
     }
 
     @Get("/logout/")
