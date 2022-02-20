@@ -31,40 +31,42 @@ export class SearchController{
         let accessToken = (<any>token).accessToken || ""
         const client = this.userService.getClient(accessToken)
 
-        let searchUrl = `/users/?$filter=personType/class eq 'Person' and personType/subclass eq 'OrganizationUser'i`
+        let searchUrl = `/users/`
 
-        let data = await client.api(searchUrl).responseType(ResponseType.JSON).get()
+        let data = await client.api(searchUrl).responseType(ResponseType.JSON)
+        .header('ConsistencyLevel','eventual')
+        .filter("endswith(mail,'@scv.si')")
+        .search(`"displayName:${search}"`)
+        .get()
 
-        let filter_data = data.value.filter(e=>e.displayName.includes(search))
-
-        return res.json(filter_data)
+        return res.json(data)
     }
 
-    // @Get("/specificUser/:id")
-    // async searchSpecificUser(@Session() session, @Headers() headers, @Res() res:Response,@Param('id') id:string){
-    //     res.setHeader('Access-Control-Allow-Methods','GET')
-    //     res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
-    //     res.setHeader('Access-Control-Allow-Credentials','true')
-    //     //API url: 
-    //     if(!session.token){
-    //         return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
-    //     }
-    //     let token = await getToken(session.token) || ""
-    //     if(token == ""){
-    //         return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
-    //     }
-    //     if(id == ""){
-    //         return res.json({})
-    //     }
+    @Get("/specificUser/:id")
+    async searchSpecificUser(@Session() session, @Headers() headers, @Res() res:Response,@Param('id') id:string){
+        res.setHeader('Access-Control-Allow-Methods','GET')
+        res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
+        res.setHeader('Access-Control-Allow-Credentials','true')
+        //API url: 
+        if(!session.token){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+        let token = await getToken(session.token) || ""
+        if(token == ""){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+        if(id == ""){
+            return res.json({})
+        }
         
 
-    //     let accessToken = (<any>token).accessToken || ""
-    //     const client = this.userService.getClient(accessToken)
+        let accessToken = (<any>token).accessToken || ""
+        const client = this.userService.getClient(accessToken)
 
-    //     let searchUrl = ``
+        let searchUrl = `/users/${id}/presence`
 
-    //     let data = await client.api(searchUrl).get()
+        let data = await client.api(searchUrl).get()
 
-    //     return res.json({})
-    // }
+        return res.json(data)
+    }
 }

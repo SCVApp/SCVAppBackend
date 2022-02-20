@@ -6,6 +6,8 @@ import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
 import getToken from "src/application/token";
 import { env } from "process";
 import { readFile } from "fs/promises";
+import axios, { AxiosRequestHeaders } from "axios";
+import * as cheerio from "cheerio"
 
 @Controller('user')
 export class UserController{
@@ -102,50 +104,12 @@ export class UserController{
         let accessToken = (<any>token).accessToken || ""
         
         const client = this.userService.getClient(accessToken)
-        const data = await client.api("/me/memberOf?$select=groupTypes,mailEnabled,securityEnabled,displayName").responseType(ResponseType.JSON).get()
 
         session.token = token
         session.save()
 
-        let razred = data.value.find(e=>e.mailEnabled == true && e.securityEnabled == true && e.groupTypes.length == 0) || ""
+        let selectedSchool = await this.userService.getUsersSchool(client)
 
-        let SchoolInfoText = (await readFile(`${process.cwd()}/src/schoolData/schoolInfo.json`)).toString()
-        let SchoolsInfo = JSON.parse(SchoolInfoText).schools
-        
-        let selectedSchool = {
-            id:"SCV",
-            urnikUrl:"https://www.easistent.com/",
-            color:"#FFFFFF",
-            schoolUrl:"https://www.scv.si/sl/",
-            name:"Šolski center Velenje",
-            razred:""
-        }
-
-        let eASchoolsLinksText = (await readFile(`${process.cwd()}/src/schoolData/eaLinksOfSchools.json`)).toString()
-        let eASchoolsLinks = JSON.parse(eASchoolsLinksText).schools
-
-
-        eASchoolsLinks.forEach(school => {
-            let classes = Object.keys(school.classes)
-            if(classes.includes(razred.displayName)){
-                let id = school.classes[razred.displayName]
-                selectedSchool.id = school.id
-                selectedSchool.urnikUrl = `${school.mainLink}${id}`
-                selectedSchool.razred = razred.displayName
-            }else{
-                let idSole = data.value.find(e=>e.mailEnabled == false && e.securityEnabled == true && e.groupTypes.length == 0 && Object.keys(SchoolsInfo).includes(e.displayName))
-                if(idSole){
-                    selectedSchool.id = idSole.displayName
-                }
-            }
-        });
-
-        if(Object.keys(SchoolsInfo).includes(selectedSchool.id)){
-            let schoolInfo = SchoolsInfo[selectedSchool.id]
-            selectedSchool.color = schoolInfo.color
-            selectedSchool.schoolUrl = schoolInfo.urlStrani
-            selectedSchool.name = schoolInfo.name
-        }
         return res.send(selectedSchool)
     }
 
@@ -291,4 +255,104 @@ export class UserController{
 
         res.json(statusData)
     }
+
+    @Get("/schedule/")
+    async getUserschedule(@Session() session, @Headers() headers,@Res() res:Response){
+        res.setHeader('Access-Control-Allow-Methods','GET')
+        res.setHeader('Access-Control-Allow-Origin',headers.origin || "")
+        res.setHeader('Access-Control-Allow-Credentials','true')
+
+        if(!session.token){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+        let token = await getToken(session.token) || ""
+        if(token == ""){
+            return res.status(HttpStatus.NOT_ACCEPTABLE).send("error")
+        }
+
+        let accessToken = (<any>token).accessToken || ""
+        
+        const client = this.userService.getClient(accessToken)
+
+        session.token = token
+        session.save()
+
+        let selectedSchool = await this.userService.getUsersSchool(client)
+        const urlZaUrnik = selectedSchool.urnikUrl || ""
+        // const urlZaUrnik = "https://www.easistent.com/urniki/b29317ef35a6e16dc2012e97a575322a8eae7f56/razredi/452040"
+
+        if(urlZaUrnik == "") return res.send("")
+        let htmlData = await (await axios.get(urlZaUrnik)).data
+        const $ = cheerio.load(htmlData)
+        const DobiRazporedUr = $ =>
+	    $('.ednevnik-seznam_ur_teden-ura') 
+	    	.map((i, razporedUr) => { 
+	    		const $razporedUr = $(razporedUr); 
+	    		return { 
+                    id:i,
+	    			ime: $razporedUr.find('.text14').text(), 
+	    			trajanje: $razporedUr.find('.text10').text(),
+                    ura:null
+	    		}; 
+	    	})
+	    	.toArray(); 
+            let razporedUr = DobiRazporedUr($)
+
+            // ednevnik-seznam_ur_teden-td-1-2022-02-18
+
+        const blokUraZdaj = ($, ura) => {
+            let $ura = $(ura)
+            return this.userService.dobiUroIzUrnika($ura)
+        }
+        
+        const uraZdaj = ($, selectorForClass) => $(selectorForClass).map((i ,razred) => {
+            const $razred = $(razred)
+
+            if($razred.children().length > 1){
+                let ure = []
+                let ura = $razred.children()[0]
+                ure.push(blokUraZdaj($,ura))
+                let blok = $($razred.children()[1]).children() || []
+                for(let i = 0;i<blok.length;i++){
+                    let child = blok[i]
+                    ure.push(blokUraZdaj($,child))
+                }
+                    
+                return ure
+            }
+                return this.userService.dobiUroIzUrnika($razred)
+            }).toArray()
+
+            const ureDanes = ($, razporedUr) => {
+                return razporedUr.map((razporedUre,i)=>{
+                    let trenutniCas = new Date()
+                    let year = trenutniCas.getFullYear()
+                    let month = (trenutniCas.getMonth()+1) < 10 ? `0${trenutniCas.getMonth()+1}`:trenutniCas.getMonth()+1
+                    let day = trenutniCas.getDate() < 10 ? `0${trenutniCas.getDate()}`:trenutniCas.getDate()
+                    // let day = 14
+                    let id = razporedUre.id
+                    let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`
+
+                    let ura = uraZdaj($,selectorForClass)
+                    if(ura.length < 1 && razporedUr.length==i+1){
+                        ura = uraZdaj($,`#ednevnik-seznam_ur_teden-td-Po-${year}-${month}-${day}`)
+                    }
+
+                    return{
+                        id:razporedUre.id,
+                        ime:razporedUre.ime,
+                        trajanje:razporedUre.trajanje,
+                        ura:ura||null
+                    }
+                })
+
+            }
+            let ureDanesNaUrniku = ureDanes($,razporedUr)
+            let trenutnoNaUrniku = this.userService.kajJeSedejNaUrniku(ureDanesNaUrniku)
+            
+            return res.json({
+                urnik:ureDanesNaUrniku,
+                trenutnoNaUrniku:trenutnoNaUrniku
+            })
+        }
 }
