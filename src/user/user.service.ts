@@ -148,8 +148,10 @@ export class UserService{
         let differencString = this.izMillisekundVMinuteinSekunde(difference)
         if(ura.ura.length==0){
             ura.doUre="/"
+            ura.zacetekUreM = -1
         }else{
             ura.doUre = differencString
+            ura.zacetekUreM = zacetniCas.getTime()
         }
         return ura
     }
