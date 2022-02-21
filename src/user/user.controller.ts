@@ -2,6 +2,7 @@ import { Controller, Get, HttpStatus, Res, Session , Headers, Param , Logger} fr
 import { UserService } from "./user.service";
 import { Response } from "express";
 import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
+import { DateTime } from "luxon"
 
 import getToken from "src/application/token";
 import { env } from "process";
@@ -325,7 +326,7 @@ export class UserController{
 
             const ureDanes = ($, razporedUr) => {
                 return razporedUr.map((razporedUre,i)=>{
-                    let trenutniCas = new Date()
+                    let trenutniCas = new Date(DateTime.now().setLocale("sl-SI").ts)
                     let year = trenutniCas.getFullYear()
                     let month = (trenutniCas.getMonth()+1) < 10 ? `0${trenutniCas.getMonth()+1}`:trenutniCas.getMonth()+1
                     let day = trenutniCas.getDate() < 10 ? `0${trenutniCas.getDate()}`:trenutniCas.getDate()
