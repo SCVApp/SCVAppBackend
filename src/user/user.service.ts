@@ -84,7 +84,12 @@ export class UserService{
             let zacetek = trajanje[0].trim().split(":")
             let konec = trajanje[1].trim().split(":")
             
-            let trenutniCas = new Date(DateTime.now().setZone("Europe/Ljubljana").ts)
+            let slovenian = DateTime.local().setZone("Europe/Ljubljana")
+            let trenutniCas = new Date()
+            trenutniCas.setFullYear(slovenian.c.year,slovenian.c.month-1,slovenian.c.day)
+            trenutniCas.setHours(slovenian.c.hour)
+            trenutniCas.setMinutes(slovenian.c.minute)
+            trenutniCas.setSeconds(slovenian.c.second)
 
             let zacetniCas = new Date(trenutniCas.getTime())
             zacetniCas.setHours(zacetek[0]);
