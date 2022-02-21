@@ -336,6 +336,8 @@ export class UserController{
                     let ura = uraZdaj($,selectorForClass)
                     if(ura.length < 1 && razporedUr.length==i+1){
                         ura = uraZdaj($,`#ednevnik-seznam_ur_teden-td-Po-${year}-${month}-${day}`)
+                    }else if(ura.length < 1 && i==0){
+                        ura = uraZdaj($,`#ednevnik-seznam_ur_teden-td-Pr-${year}-${month}-${day}`)
                     }
 
                     return{

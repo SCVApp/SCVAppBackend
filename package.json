@@ -37,6 +37,7 @@
     "fastify": "^3.27.0",
     "fastify-cookie": "^5.5.0",
     "isomorphic-fetch": "^3.0.0",
+    "luxon": "^2.3.0",
     "nestjs-easyconfig": "^2.4.4",
     "nestjs-session": "^2.0.0",
     "postgres": "^1.0.2",

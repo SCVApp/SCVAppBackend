@@ -2,6 +2,7 @@ import "isomorphic-fetch"
 import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
 import { Injectable } from "@nestjs/common";
 import { readFile } from "fs/promises";
+import { DateTime } from "luxon"
 
 @Injectable()
 export class UserService{
@@ -83,7 +84,7 @@ export class UserService{
             let zacetek = trajanje[0].trim().split(":")
             let konec = trajanje[1].trim().split(":")
             
-            let trenutniCas = new Date()
+            let trenutniCas = new Date(DateTime.now().setLocale("sl-SI").ts)
 
             let zacetniCas = new Date(trenutniCas.getTime())
             zacetniCas.setHours(zacetek[0]);
