@@ -152,6 +152,7 @@ export class UserService{
         }else{
             ura.doUre = differencString
             ura.zacetekUreM = zacetniCas.getTime()
+            console.log(differencString)
             console.log(zacetniCas.getTime())
         }
         return ura
