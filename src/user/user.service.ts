@@ -151,16 +151,15 @@ export class UserService{
             ura.zacetekUreM = -1
         }else{
             ura.doUre = differencString
-            ura.zacetekUreM = zacetniCas.getTime()
-            console.log(differencString)
-            console.log(zacetniCas.getTime())
+            let offSetTime = (60+zacetniCas.getTimezoneOffset())/60;
+            ura.zacetekUreM = zacetniCas.getTime() - (offSetTime*3600000)
         }
         return ura
     }
 
     izMillisekundVMinuteinSekunde(millis) {
         let minutes = Math.floor(millis / 60000)
-        let seconds = (millis % 60000) / 1000
+        let seconds = Math.floor((millis % 60000) / 1000)
         return minutes + "min " + (seconds < 10 ? '0' : '') + seconds + "s"
     }
 
