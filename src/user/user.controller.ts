@@ -73,7 +73,7 @@ export class UserController{
 
     @Get("/logoutUrl/")
     logoutUrl(@Res() res:Response){
-        res.redirect(`https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${env.OAUTH_REDIRECT_URI==="http://localhost:5050/auth/redirect/"?"http://localhost:5050/user/logout":"https://scvapp-backend.herokuapp.com/user/logout"}`)
+        res.redirect(`https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${env.OAUTH_REDIRECT_URI==="http://localhost:5050/auth/redirect/"?"http://localhost:5050/user/logout":"https://backend.app.scv.si/user/logout"}`)
     }
 
     @Get("/logout/")
@@ -82,7 +82,7 @@ export class UserController{
         let host = headers.host
         if(host == "localhost:5050"){
             return res.redirect("http://localhost:3000/?success=logout")
-        }else if(host == "scvapp-backend.herokuapp.com"){
+        }else if(host == "backend.app.scv.si"){
             return res.redirect("https://app.scv.si/?success=logout")
         }
         return res.redirect("https://app.scv.si/?success=logout")
