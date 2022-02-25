@@ -151,8 +151,8 @@ export class UserService{
             ura.zacetekUreM = -1
         }else{
             ura.doUre = differencString
-            let offSetTime = (60+zacetniCas.getTimezoneOffset())/60;
-            ura.zacetekUreM = zacetniCas.getTime() - (offSetTime*3600000)
+            let utcZacetek = Date.UTC(zacetniCas.getUTCFullYear(),zacetniCas.getUTCMonth(),zacetniCas.getUTCDate(),zacetniCas.getUTCHours(),zacetniCas.getUTCMinutes(),zacetniCas.getUTCSeconds())
+            ura.zacetekUreM = utcZacetek
         }
         return ura
     }
