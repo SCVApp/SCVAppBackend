@@ -17,7 +17,7 @@ import { env } from 'process';
         secret:`${env.SESSION_SECRET}`,
         cookie:{
           domain:`${env.OAUTH_REDIRECT_URI==="http://localhost:5050/auth/redirect/"?"localhost":"app.scv.si"}`
-        }
+        },
       },
     })
   ],

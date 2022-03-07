@@ -13,10 +13,10 @@ export class LoginController{
 
     @Get('/authUrl/')
     @Redirect('/', 302)
-    getAuthUrl(@Headers() headers){
+    getAuthUrl(@Headers() headers){//Funkcija za preusmeritev na prijavni url
         let referer = headers.referer
         let name = "app"
-        switch(referer){
+        switch(referer){ // Preverjanje iz katere platforme se želi uporabnik prijaviti v aplikacijo(za kasnejše potreba)
             case 'http://localhost:3000/':
                 name = "localhost"
                 break;
@@ -28,40 +28,39 @@ export class LoginController{
                 break;
         }
         let state = `${name}`
-        return this.loginService.getAuthUrl(state)
+        return this.loginService.getAuthUrl(state)//Pokličenmo funkcijo za generiranje preusmeritvenega URL-ja in nato vrnemo preusmeritveni URL
     }
 
     @Get("/redirect/")
-    async redirect(@Query() query, @Session() session, @Res() res:Response){
-        let code = query.code || ""
-        let state = query.state || ""
+    async redirect(@Query() query, @Session() session, @Res() res:Response){// Funkcija za preusmeritev iz Microsofta po prijavi
+        let code = query.code || "" //Koda za dostop do dostopnega žetona,... od uporabnika
+        let state = query.state || ""//Oznaka za platforme iz katere se je uporabnik prijavil
 
-        if(code == ""){
-            return res.send({})
+        if(code == ""){//Preverimo če je koda prazna
+            return res.send({})//Če je koda prazna vrnemo
         }
 
-        const tokenRequest = {
-            code: code,
-            scopes: env.OAUTH_SCOPES.split(" "),
-            redirectUri: env.OAUTH_REDIRECT_URI,
-            accessType: "offline",
+        const tokenRequest = {//Parametri za zahtevo za dostopni žeton,... od uporabnika
+            code: code,//Koda za dostop
+            scopes: env.OAUTH_SCOPES.split(" "),//Katere pravice zahtevamo od uporabnika
+            redirectUri: env.OAUTH_REDIRECT_URI,//URL od backend-a na katerega je bil preusmerjen uporabnik po prijavi
         };
-        let respons = await clientApplication.acquireTokenByCode(tokenRequest)
-        const tokenCache = clientApplication.getTokenCache().serialize()
+        let respons = await clientApplication.acquireTokenByCode(tokenRequest)//Zahtevamo dostopni žeton, žeton za osvežitev,... od uporabnika
+        const tokenCache = clientApplication.getTokenCache().serialize()// Iz predpomnilnika zahtevamo podake
         const refreshTokenObject = (JSON.parse(tokenCache)).RefreshToken
-        const refreshToken = refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;
-        const token = {
-            accessToken: respons.accessToken,
-            refreshToken: refreshToken,
-            expiresOn:respons.expiresOn,
+        const refreshToken = refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;// Žeton za osvežitev
+        const token = {//Žeton, ki ga shranimo v uporabnikovo sejo ali v primeru mobilne aplikacije v pomnilnik in vsebuje:
+            accessToken: respons.accessToken,//Dostopni žeton
+            refreshToken: refreshToken,//Žeton za osvežitev
+            expiresOn:respons.expiresOn,//Rok trajanja dostopnega žetona
         }
-        session.token = token
-        session.save()
+        session.token = token //Žeton shranimo v uporabnikovo sejo
+        session.save()//Uporabnikovo sejo shranimo
         if(state == "appscv"){//app.scv.si
-            return res.redirect("https://app.scv.si/?success=signin")
+            return res.redirect("https://app.scv.si/?success=signin")//Tukaj preusmerimo uporabnika iz katere platforme je prišel
         }else if(state == "localhost"){//localhost
-            return res.redirect("http://localhost:3000/?success=signin")
+            return res.redirect("http://localhost:3000/?success=signin")//Tukaj preusmerimo uporabnika iz katere platforme je prišel
         }
-        return res.json(token);
+        return res.json(token);//Tukaj samo vrnemo žeton za uporabnika na aplikaciji
     }
 }
