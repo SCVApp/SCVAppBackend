@@ -61,6 +61,7 @@ export class LoginController{
         }else if(state == "localhost"){//localhost
             return res.redirect("http://localhost:3000/?success=signin")//Tukaj preusmerimo uporabnika iz katere platforme je prišel
         }
-        return res.json(token);//Tukaj samo vrnemo žeton za uporabnika na aplikaciji
+        // return res.send(token)
+        return res.redirect(`app://app.scv.si/mobileapp?accessToken=${respons.accessToken}&refreshToken=${refreshToken}&expiresOn=${respons.expiresOn}`);//Tukaj samo vrnemo žeton za uporabnika na aplikaciji
     }
 }

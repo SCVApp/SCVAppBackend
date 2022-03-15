@@ -1,8 +1,18 @@
 import "isomorphic-fetch"
 import { Client, ResponseType } from "@microsoft/microsoft-graph-client";
-import { Injectable } from "@nestjs/common";
+import { Injectable,
+    Controller,
+    Get,
+    HttpStatus,
+    Res,
+    Session,
+    Headers,
+    Param,
+    Logger, } from "@nestjs/common";
 import { readFile } from "fs/promises";
 import { DateTime } from "luxon"
+import { Response } from 'express';
+import getToken from 'src/application/token';
 
 @Injectable()
 export class UserService{
@@ -15,6 +25,46 @@ export class UserService{
             }
         });
         return client
+    }
+
+    async getAccessToken(@Session() session,
+    @Res() res: Response,
+    @Headers() headers,){
+        //Funkcija za pridebitev osnovnih uporabnikovih podatkov
+        res.setHeader('Access-Control-Allow-Methods', 'GET');
+        res.setHeader(
+          'Access-Control-Allow-Origin',
+          `${
+            headers.host === 'localhost:5050'
+              ? 'http://localhost:3000'
+              : 'https://app.scv.si'
+          }`,
+        );
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+      
+        let authorization = headers.authorization
+      
+        if (!session.token && !authorization) {
+          //Preverimo če je v uporabnikovi seji shranjen žeton
+          return false; //Če žetona ni vrnemo napako
+        }
+        let token = ""
+        if(!authorization){
+          token = (await getToken(session.token)) || ''; //Žeton
+          if (token == '') {
+            //Preverimo ali je žeton pravilen in ali če je že potekel, da ga obnovimo
+            return false; //Če je nepravilen vrenemo napako
+          }
+        }
+        let accessToken = '' //Iz žetona dobimo dostopni žeton
+        if(!authorization){
+          accessToken = (<any>token).accessToken || '';
+        }else{
+          accessToken = authorization
+        }
+        session.token = token; //Žeton shranimo v uporabnikovo sejo
+        session.save(); //Uporabnikovo sejo shranimo
+        return accessToken
     }
 
     dobiUroIzUrnika($razred){

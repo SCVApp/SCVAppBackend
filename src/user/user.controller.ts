@@ -7,6 +7,7 @@ import {
   Headers,
   Param,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
@@ -29,33 +30,13 @@ export class UserController {
     @Res() res: Response,
     @Headers() headers,
   ) {
-    //Funkcija za pridebitev osnovnih uporabnikovih podatkov
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      `${
-        headers.host === 'localhost:5050'
-          ? 'http://localhost:3000'
-          : 'https://app.scv.si'
-      }`,
-    );
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    if (!session.token) {
-      //Preverimo če je v uporabnikovi seji shranjen žeton
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error'); //Če žetona ni vrnemo napako
+    
+    let accessToken = await this.userService.getAccessToken(session,res,headers);
+    if(!accessToken){
+      return res.status(403).send("error");
     }
-    let token = (await getToken(session.token)) || ''; //Žeton
-    if (token == '') {
-      //Preverimo ali je žeton pravilen in ali če je že potekel, da ga obnovimo
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error'); //Če je nepravilen vrenemo napako
-    }
-
-    let accessToken = (<any>token).accessToken || ''; //Iz žetona dobimo dostopni žeton
     const client = this.userService.getClient(accessToken); //Uporabnik
     let data = await client.api('/me').get(); //Z uporabnikovo funckijo get dobimo želene podatke
-    session.token = token; //Žeton shranimo v uporabnikovo sejo
-    session.save(); //Uporabnikovo sejo shranimo
 
     return res.status(HttpStatus.OK).json(data); //Vrnemo uporabnikove podatke
   }
@@ -66,17 +47,11 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    if (!session.token) {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
+    let accessToken = await this.userService.getAccessToken(session,res,headers);
+    if(!accessToken){
+      return res.status(403).send("error");
     }
-    let token = (await getToken(session.token)) || '';
-    if (token == '') {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
-    }
-
-    let accessToken = (<any>token).accessToken || '';
     const client = this.userService.getClient(accessToken);
-    session.token = token;
     session.save();
     let data;
     try {
@@ -85,14 +60,14 @@ export class UserController {
         .responseType(ResponseType.ARRAYBUFFER)
         .get();
     } catch (err) {
-      return res.sendFile(`${process.cwd()}/src/pictures/profilePicture.svg`);
+      return res.send("");
     }
     if (data) {
       let buffer = Buffer.from(data, 'base64');
       res.setHeader('content-type', 'image/jpeg');
       res.send(buffer);
     } else {
-      return res.send('no foto');
+      return res.send("");
     }
   }
 
@@ -128,24 +103,12 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Origin', headers.origin || '');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    if (!session.token) {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
+    let accessToken = await this.userService.getAccessToken(session,res,headers);
+    if(!accessToken){
+      return res.status(403).send("error");
     }
-    let token = (await getToken(session.token)) || '';
-    if (token == '') {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
-    }
-
-    let accessToken = (<any>token).accessToken || '';
 
     const client = this.userService.getClient(accessToken);
-
-    session.token = token;
-    session.save();
 
     let selectedSchool = await this.userService.getUsersSchool(client);
 
@@ -159,23 +122,11 @@ export class UserController {
     @Res() res: Response,
     @Param('status') status: string,
   ) {
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Origin', headers.origin || '');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    if (!session.token) {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
+    let accessToken = await this.userService.getAccessToken(session,res,headers);
+    if(!accessToken){
+      return res.status(403).send("error");
     }
-    let token = (await getToken(session.token)) || '';
-    if (token == '') {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
-    }
-
-    let accessToken = (<any>token).accessToken || '';
     const client = this.userService.getClient(accessToken);
-
-    session.token = token;
-    session.save();
 
     let availability = '';
     let activity = '';
@@ -230,19 +181,10 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Origin', headers.origin || '');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    if (!session.token) {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
+    let accessToken = await this.userService.getAccessToken(session,res,headers);
+    if(!accessToken){
+      return res.status(403).send("error");
     }
-    let token = (await getToken(session.token)) || '';
-    if (token == '') {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
-    }
-
-    let accessToken = (<any>token).accessToken || '';
     const client = this.userService.getClient(accessToken);
 
     const data = await client
@@ -250,9 +192,6 @@ export class UserController {
       .version('beta')
       .responseType(ResponseType.JSON)
       .get();
-
-    session.token = token;
-    session.save();
 
     let availability = data.availability;
 
@@ -316,24 +255,12 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Origin', headers.origin || '');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    if (!session.token) {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
+    let accessToken = await this.userService.getAccessToken(session,res,headers);
+    if(!accessToken){
+      return res.status(403).send("error");
     }
-    let token = (await getToken(session.token)) || '';
-    if (token == '') {
-      return res.status(HttpStatus.NOT_ACCEPTABLE).send('error');
-    }
-
-    let accessToken = (<any>token).accessToken || '';
 
     const client = this.userService.getClient(accessToken);
-
-    session.token = token;
-    session.save();
 
     let selectedSchool = await this.userService.getUsersSchool(client);
     const urlZaUrnik = selectedSchool.urnikUrl || '';
