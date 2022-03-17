@@ -19,6 +19,7 @@ import { env } from 'process';
 import { readFile } from 'fs/promises';
 import axios, { AxiosRequestHeaders } from 'axios';
 import * as cheerio from 'cheerio';
+import { blobToBase64String } from 'blob-util';
 
 @Controller('user')
 export class UserController {
@@ -60,14 +61,18 @@ export class UserController {
         .responseType(ResponseType.ARRAYBUFFER)
         .get();
     } catch (err) {
-      return res.send("");
+      let userData = await client.api('/me').get();
+      let img = await (await fetch(`https://ui-avatars.com/api/?name=${userData.givenName[0]||""}+${userData.surname[0]||""}&background=0094d9&color=000&size=512`)).arrayBuffer()
+      let buffer = Buffer.from(img)
+      res.setHeader('content-type', 'image/jpeg');
+      return res.send(buffer);
     }
     if (data) {
       let buffer = Buffer.from(data, 'base64');
       res.setHeader('content-type', 'image/jpeg');
       res.send(buffer);
     } else {
-      return res.send("");
+      return res.status(404).send("No image for you.")
     }
   }
 
