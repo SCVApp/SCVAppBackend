@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Query, Redirect, Session, Headers, Res } from "@nestjs/common";
+import { Controller, Get, HttpCode, Query, Redirect, Session, Headers, Res, Post, Body } from "@nestjs/common";
 import { Response } from "express";
 import { env } from "process";
 import { LoginService } from "./login.service";
@@ -6,6 +6,7 @@ import * as msal from "@azure/msal-node"
 
 import clientApplication from "src/application/clientApplication";
 import { FastifyReply } from "fastify";
+import getToken from "src/application/token";
 
 @Controller('auth')
 export class LoginController{
@@ -63,5 +64,27 @@ export class LoginController{
         }
         // return res.send(token)
         return res.redirect(`app://app.scv.si/mobileapp?accessToken=${respons.accessToken}&refreshToken=${refreshToken}&expiresOn=${respons.expiresOn}`);//Tukaj samo vrnemo žeton za uporabnika na aplikaciji
+    }
+
+    @Post("/refreshToken/")
+    async refreshToken(@Body() body,@Res() res:Response){
+        
+        let accessToken = body.accessToken || ""
+        let refreshToken = body.refreshToken || ""
+        let expiresOn = body.expiresOn || ""
+        if(accessToken == "" || refreshToken == "" || expiresOn == ""){
+            return res.sendStatus(403);
+        }
+
+        let token = {
+            accessToken,
+            refreshToken,
+            expiresOn
+        }
+        let newToken = await getToken(token);
+        if(newToken){
+            return res.status(200).json(newToken)
+        }
+        return res.sendStatus(403);
     }
 }
