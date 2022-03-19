@@ -10,25 +10,19 @@ export default async function getToken(token){
         return {}
     }
 
-    let now = new Date();
-    let dateNow = Date.UTC(now.getUTCFullYear(),now.getUTCMonth(), now.getUTCDate() , 
-      now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-    let expDate = new Date(exp)
-    let expUTCTime = Date.UTC(expDate.getUTCFullYear(),expDate.getUTCMonth(), expDate.getUTCDate() , 
-    expDate.getUTCHours(), expDate.getUTCMinutes(), expDate.getUTCSeconds(), expDate.getUTCMilliseconds());
+    let now = new Date()
+    let expDateUTC = new Date(exp)
     
-    if(dateNow < expUTCTime){
+    if(now.getTime() < (expDateUTC.getTime()-3600000)){
         console.log("not expired")
         return token
     }else{
         console.log("expired")
         const tokenRequest = {
             refreshToken:refreshToken,
-            scopes: env.OAUTH_SCOPES.split(" "),
-            accessType: "offline",
+            scopes: env.OAUTH_SCOPES.split(" ")
         };
         let respons = await clientApplication.acquireTokenByRefreshToken(tokenRequest)
-        // session.user = respons
         const tokenCache = clientApplication.getTokenCache().serialize()
         const refreshTokenObject = (JSON.parse(tokenCache)).RefreshToken
         const rf = refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;

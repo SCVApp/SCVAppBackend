@@ -1,5 +1,5 @@
-import { Controller, Get, HttpCode, Query, Redirect, Session, Headers, Res, Post, Body } from "@nestjs/common";
-import { Response } from "express";
+import { Controller, Get, HttpCode, Query, Redirect, Session, Headers, Res, Post, Body, Req } from "@nestjs/common";
+import { Response,Request } from "express";
 import { env } from "process";
 import { LoginService } from "./login.service";
 import * as msal from "@azure/msal-node"
@@ -45,6 +45,7 @@ export class LoginController{
             code: code,//Koda za dostop
             scopes: env.OAUTH_SCOPES.split(" "),//Katere pravice zahtevamo od uporabnika
             redirectUri: env.OAUTH_REDIRECT_URI,//URL od backend-a na katerega je bil preusmerjen uporabnik po prijavi
+            accessType: "offline",
         };
         let respons = await clientApplication.acquireTokenByCode(tokenRequest)//Zahtevamo dostopni žeton, žeton za osvežitev,... od uporabnika
         const tokenCache = clientApplication.getTokenCache().serialize()// Iz predpomnilnika zahtevamo podake
@@ -68,7 +69,7 @@ export class LoginController{
     }
 
     @Post("/refreshToken/")
-    async refreshToken(@Body() body,@Res() res:Response){
+    async refreshToken(@Body() body,@Res() res:Response,@Req() req:Request){
         
         let accessToken = body.accessToken || ""
         let refreshToken = body.refreshToken || ""
@@ -82,7 +83,6 @@ export class LoginController{
             refreshToken,
             expiresOn
         }
-        console.log(expiresOn)
         let newToken = await getToken(token);
         if(newToken){
             return res.status(200).json(newToken)
