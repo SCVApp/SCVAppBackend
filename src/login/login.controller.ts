@@ -63,6 +63,7 @@ export class LoginController{
             return res.redirect("http://localhost:3000/?success=signin")//Tukaj preusmerimo uporabnika iz katere platforme je prišel
         }
         // return res.send(token)
+        console.log(respons.expiresOn)
         return res.redirect(`app://app.scv.si/mobileapp?accessToken=${respons.accessToken}&refreshToken=${refreshToken}&expiresOn=${respons.expiresOn}`);//Tukaj samo vrnemo žeton za uporabnika na aplikaciji
     }
 
@@ -81,6 +82,7 @@ export class LoginController{
             refreshToken,
             expiresOn
         }
+        console.log(expiresOn)
         let newToken = await getToken(token);
         if(newToken){
             return res.status(200).json(newToken)

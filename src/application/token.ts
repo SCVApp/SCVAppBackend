@@ -13,9 +13,11 @@ export default async function getToken(token){
     let now = new Date();
     let dateNow = Date.UTC(now.getUTCFullYear(),now.getUTCMonth(), now.getUTCDate() , 
       now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-    let expDate = new Date(exp).getTime()
-
-    if(dateNow < expDate){
+    let expDate = new Date(exp)
+    let expUTCTime = Date.UTC(expDate.getUTCFullYear(),expDate.getUTCMonth(), expDate.getUTCDate() , 
+    expDate.getUTCHours(), expDate.getUTCMinutes(), expDate.getUTCSeconds(), expDate.getUTCMilliseconds());
+    
+    if(dateNow < expUTCTime){
         console.log("not expired")
         return token
     }else{
