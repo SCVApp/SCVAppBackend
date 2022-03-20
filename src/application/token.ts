@@ -1,7 +1,4 @@
 import { env } from "process"
-import clientApplication from "./clientApplication"
-import {RefreshTokenRequest} from "@azure/msal-node"
-import { json } from "stream/consumers"
 
 export default async function getToken(token){
     let accessToken = token.accessToken || ""
@@ -14,7 +11,7 @@ export default async function getToken(token){
 
     let now = new Date()
     let expDateUTC = new Date(exp)
-    console.log(expDateUTC.getTime())
+
     if(now.getTime() < (expDateUTC.getTime()-3600000)){
         console.log("not expired")
         return token
@@ -27,6 +24,7 @@ export default async function getToken(token){
                 "Content-Type":"application/x-www-form-urlencoded",
             },
             method:"post",
+            cache:"no-store"
         })
         if(respons.status != 200){
             return null

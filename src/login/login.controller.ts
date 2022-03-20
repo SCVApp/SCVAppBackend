@@ -50,7 +50,17 @@ export class LoginController{
         let respons = await clientApplication.acquireTokenByCode(tokenRequest)//Zahtevamo dostopni žeton, žeton za osvežitev,... od uporabnika
         const tokenCache = clientApplication.getTokenCache().serialize()// Iz predpomnilnika zahtevamo podake
         const refreshTokenObject = (JSON.parse(tokenCache)).RefreshToken
-        const refreshToken = refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;// Žeton za osvežitev
+        let homeAccountId = respons.account.homeAccountId
+        let refreshToken = ""//Žeton za osvežitev
+        console.log(respons)
+        Object.entries( refreshTokenObject ).forEach( ( item : any )  => 
+        {
+            if ( item[1].home_account_id === homeAccountId )
+            {
+                refreshToken = item[1].secret;
+                console.log(item[1]);
+            }
+        });
         const token = {//Žeton, ki ga shranimo v uporabnikovo sejo ali v primeru mobilne aplikacije v pomnilnik in vsebuje:
             accessToken: respons.accessToken,//Dostopni žeton
             refreshToken: refreshToken,//Žeton za osvežitev
