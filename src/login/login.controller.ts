@@ -58,7 +58,6 @@ export class LoginController{
             if ( item[1].home_account_id === homeAccountId )
             {
                 refreshToken = item[1].secret;
-                console.log(item[1]);
             }
         });
         const token = {//Žeton, ki ga shranimo v uporabnikovo sejo ali v primeru mobilne aplikacije v pomnilnik in vsebuje:
