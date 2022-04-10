@@ -52,7 +52,6 @@ export class LoginController{
         const refreshTokenObject = (JSON.parse(tokenCache)).RefreshToken
         let homeAccountId = respons.account.homeAccountId
         let refreshToken = ""//Žeton za osvežitev
-        console.log(respons)
         Object.entries( refreshTokenObject ).forEach( ( item : any )  => 
         {
             if ( item[1].home_account_id === homeAccountId )
@@ -73,7 +72,6 @@ export class LoginController{
             return res.redirect("http://localhost:3000/?success=signin")//Tukaj preusmerimo uporabnika iz katere platforme je prišel
         }
         // return res.send(token)
-        console.log(respons.expiresOn)
         return res.redirect(`app://app.scv.si/mobileapp?accessToken=${respons.accessToken}&refreshToken=${refreshToken}&expiresOn=${respons.expiresOn}`);//Tukaj samo vrnemo žeton za uporabnika na aplikaciji
     }
 
