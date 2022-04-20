@@ -31,10 +31,13 @@ export class UserController {
     @Res() res: Response,
     @Headers() headers,
   ) {
-    
-    let accessToken = await this.userService.getAccessToken(session,res,headers);
-    if(!accessToken){
-      return res.status(403).send("error");
+    let accessToken = await this.userService.getAccessToken(
+      session,
+      res,
+      headers,
+    );
+    if (!accessToken) {
+      return res.status(403).send('error');
     }
     const client = this.userService.getClient(accessToken); //Uporabnik
     let data = await client.api('/me').get(); //Z uporabnikovo funckijo get dobimo želene podatke
@@ -48,9 +51,13 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    let accessToken = await this.userService.getAccessToken(session,res,headers);
-    if(!accessToken){
-      return res.status(403).send("error");
+    let accessToken = await this.userService.getAccessToken(
+      session,
+      res,
+      headers,
+    );
+    if (!accessToken) {
+      return res.status(403).send('error');
     }
     const client = this.userService.getClient(accessToken);
     session.save();
@@ -62,8 +69,14 @@ export class UserController {
         .get();
     } catch (err) {
       let userData = await client.api('/me').get();
-      let img = await (await fetch(`https://ui-avatars.com/api/?name=${userData.givenName[0]||""}+${userData.surname[0]||""}&background=0094d9&color=000&size=512`)).arrayBuffer()
-      let buffer = Buffer.from(img)
+      let img = await (
+        await fetch(
+          `https://ui-avatars.com/api/?name=${userData.givenName[0] || ''}+${
+            userData.surname[0] || ''
+          }&background=0094d9&color=000&size=512`,
+        )
+      ).arrayBuffer();
+      let buffer = Buffer.from(img);
       res.setHeader('content-type', 'image/jpeg');
       return res.send(buffer);
     }
@@ -72,13 +85,14 @@ export class UserController {
       res.setHeader('content-type', 'image/jpeg');
       res.send(buffer);
     } else {
-      return res.status(404).send("No image for you.")
+      return res.status(404).send('No image for you.');
     }
   }
 
   @Get('/logoutUrl/')
-  logoutUrl(@Res() res: Response) {
+  logoutUrl(@Res() res: Response, @Session() session) {
     //Funkcija ki te preusmeri na Microsoftov URL za odjavo iz Microsoft profila
+
     res.redirect(
       `https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${
         env.OAUTH_REDIRECT_URI === 'http://localhost:5050/auth/redirect/'
@@ -108,15 +122,18 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    let accessToken = await this.userService.getAccessToken(session,res,headers);
-    if(!accessToken){
-      return res.status(403).send("error");
+    let accessToken = await this.userService.getAccessToken(
+      session,
+      res,
+      headers,
+    );
+    if (!accessToken) {
+      return res.status(403).send('error');
     }
 
     const client = this.userService.getClient(accessToken);
 
     let selectedSchool = await this.userService.getUsersSchool(client);
-
     return res.send(selectedSchool);
   }
 
@@ -127,9 +144,13 @@ export class UserController {
     @Res() res: Response,
     @Param('status') status: string,
   ) {
-    let accessToken = await this.userService.getAccessToken(session,res,headers);
-    if(!accessToken){
-      return res.status(403).send("error");
+    let accessToken = await this.userService.getAccessToken(
+      session,
+      res,
+      headers,
+    );
+    if (!accessToken) {
+      return res.status(403).send('error');
     }
     const client = this.userService.getClient(accessToken);
 
@@ -186,9 +207,13 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    let accessToken = await this.userService.getAccessToken(session,res,headers);
-    if(!accessToken){
-      return res.status(403).send("error");
+    let accessToken = await this.userService.getAccessToken(
+      session,
+      res,
+      headers,
+    );
+    if (!accessToken) {
+      return res.status(403).send('error');
     }
     const client = this.userService.getClient(accessToken);
 
@@ -260,9 +285,13 @@ export class UserController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    let accessToken = await this.userService.getAccessToken(session,res,headers);
-    if(!accessToken){
-      return res.status(403).send("error");
+    let accessToken = await this.userService.getAccessToken(
+      session,
+      res,
+      headers,
+    );
+    if (!accessToken) {
+      return res.status(403).send('error');
     }
 
     const client = this.userService.getClient(accessToken);
@@ -273,18 +302,18 @@ export class UserController {
     if (urlZaUrnik == '') return res.send('');
     let htmlData = await (await axios.get(urlZaUrnik)).data;
     const $ = cheerio.load(htmlData);
-    let idForSelecting = 0
+    let idForSelecting = 0;
     const DobiRazporedUr = ($) =>
       $('.ednevnik-seznam_ur_teden-ura')
         .map((i, razporedUr) => {
           const $razporedUr = $(razporedUr);
-          let ime = $razporedUr.find('.text14').text()
-          if(ime == "1. ura" && idForSelecting!=1){
-            idForSelecting = 1
+          let ime = $razporedUr.find('.text14').text();
+          if (ime == '1. ura' && idForSelecting != 1) {
+            idForSelecting = 1;
           }
-          idForSelecting+=1;
+          idForSelecting += 1;
           return {
-            id: (idForSelecting-1),
+            id: idForSelecting - 1,
             ime: $razporedUr.find('.text14').text(),
             trajanje: $razporedUr.find('.text10').text(),
             ura: null,
