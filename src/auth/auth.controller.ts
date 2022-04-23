@@ -49,7 +49,7 @@ export class AuthController {
   }
 
   @Get('redirect')
-  async redirect(@Query() query, @Res({ passthrough: true }) res: Response) {
+  async redirect(@Query() query, @Res() res: Response) {
     // Funkcija za preusmeritev iz Microsofta po prijavi
     let code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
     let state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil

@@ -84,7 +84,7 @@ export class UserController {
   }
 
   @Get('/logout/')
-  logoutUser(@Headers() headers, @Res({ passthrough: true }) res: Response) {
+  logoutUser(@Headers() headers, @Res() res: Response) {
     //Funkcija, ki skrbi za zbrisanje žetona iz uporabnikove seje po izpisu iz Microsoftovega računa
     res.clearCookie('jwt');
     res.clearCookie('token');
