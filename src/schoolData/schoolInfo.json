@@ -1,34 +1,34 @@
 {
-    "schools":{
-        "ERS":{
-            "name":"Elektro in računalniška šola",
-            "urlStrani":"https://ers.scv.si/sl/",
-            "color":"#0094d9"
-        },
-        "GIM":{
-            "name":"Gimnazija",
-            "urlStrani":"https://gimnazija.scv.si/",
-            "color":"#FFCA05"
-        },
-        "SSD":{
-            "name":"Šola za storitvene dejavnosti",
-            "urlStrani":"https://storitvena.scv.si/sl/",
-            "color":"#EE5BA0"
-        },
-        "SSGO":{
-            "name":"Šola za strojništvo, geotehniko in okolje",
-            "urlStrani":"https://ssgo.scv.si/sl/",
-            "color":"#a6ce39"
-        },
-        "MIC":{
-            "name":"Medpodjetniško izobraževalni center",
-            "urlStrani":"https://mic.scv.si/",
-            "color":"#ED1164"
-        },
-        "VSS":{
-            "name":"Višja strokovna šola",
-            "urlStrani":"https://vss.scv.si/sl/",
-            "color":"#8DD7F7"
-        }
+  "schools": {
+    "ERS": {
+      "name": "Elektro in računalniška šola",
+      "urlStrani": "https://ers.scv.si/sl/",
+      "color": "#0094d9"
+    },
+    "GIM": {
+      "name": "Gimnazija",
+      "urlStrani": "https://gimnazija.scv.si/",
+      "color": "#FFCA05"
+    },
+    "SSD": {
+      "name": "Šola za storitvene dejavnosti",
+      "urlStrani": "https://storitvena.scv.si/sl/",
+      "color": "#EE5BA0"
+    },
+    "SSGO": {
+      "name": "Šola za strojništvo, geotehniko in okolje",
+      "urlStrani": "https://ssgo.scv.si/sl/",
+      "color": "#a6ce39"
+    },
+    "MIC": {
+      "name": "Medpodjetniško izobraževalni center",
+      "urlStrani": "https://mic.scv.si/",
+      "color": "#ED1164"
+    },
+    "VSS": {
+      "name": "Višja strokovna šola",
+      "urlStrani": "https://vss.scv.si/sl/",
+      "color": "#8DD7F7"
     }
+  }
 }
