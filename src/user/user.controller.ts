@@ -7,18 +7,21 @@ import {
   UnauthorizedException,
   Headers,
   Param,
+  Redirect,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { ResponseType } from '@microsoft/microsoft-graph-client';
 import { env } from 'process';
+import { TokenService } from 'src/token/token.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly tokenService: TokenService,
   ) {}
 
   @Get('/get/')
@@ -73,7 +76,6 @@ export class UserController {
   @Get('/logoutUrl/')
   logoutUrl(@Res() res: Response) {
     //Funkcija ki te preusmeri na Microsoftov URL za odjavo iz Microsoft profila
-
     res.redirect(
       `https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${
         env.OAUTH_REDIRECT_URI === 'http://localhost:5050/auth/redirect/'
@@ -84,18 +86,19 @@ export class UserController {
   }
 
   @Get('/logout/')
-  logoutUser(@Headers() headers, @Res() res: Response) {
+  @Redirect('https://app.scv.si', 302)
+  logoutUser(@Headers() headers, @Res({ passthrough: true }) res: Response) {
     //Funkcija, ki skrbi za zbrisanje žetona iz uporabnikove seje po izpisu iz Microsoftovega računa
-    res.clearCookie('jwt');
-    res.clearCookie('token');
+    res.clearCookie('jwt', this.tokenService.getCookieOptions());
+    res.clearCookie('token', this.tokenService.getCookieOptions());
     let host = headers.host;
     if (host == 'localhost:5050') {
       //tukaj preusmerimo uporabnika, glede na to iz kod je prisel
-      return res.redirect('http://localhost:3000/?success=logout');
+      return { url: 'http://localhost:3000/?success=logout', status: 200 };
     } else if (host == 'backend.app.scv.si') {
-      return res.redirect('https://app.scv.si/?success=logout');
+      return { url: 'https://app.scv.si/?success=logout', status: 200 };
     }
-    return res.redirect('https://app.scv.si/?success=logout');
+    return { url: 'https://app.scv.si/?success=logout', status: 200 };
   }
 
   @Get('/school/')

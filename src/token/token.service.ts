@@ -9,6 +9,17 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
+
+  getCookieOptions() {
+    return {
+      httpOnly: true,
+      domain:
+        env.OAUTH_REDIRECT_URI === 'http://localhost:5050/auth/redirect/'
+          ? 'localhost'
+          : 'app.scv.si',
+    };
+  }
+
   async getToken(token: Token): Promise<Token> {
     let now = new Date();
     let expDateUTC = new Date(token.expiresOn);
@@ -63,19 +74,7 @@ export class TokenService {
     const jwtRefreshToken = await this.jwtService.signAsync({
       refreshToken: token.refreshToken,
     });
-    res.cookie('jwt', jwt, {
-      httpOnly: true,
-      domain:
-        env.OAUTH_REDIRECT_URI === 'http://localhost:5050/auth/redirect/'
-          ? 'localhost'
-          : 'app.scv.si',
-    });
-    res.cookie('token', jwtRefreshToken, {
-      httpOnly: true,
-      domain:
-        env.OAUTH_REDIRECT_URI === 'http://localhost:5050/auth/redirect/'
-          ? 'localhost'
-          : 'app.scv.si',
-    });
+    res.cookie('jwt', jwt, this.getCookieOptions());
+    res.cookie('token', jwtRefreshToken, this.getCookieOptions());
   }
 }
