@@ -9,19 +9,12 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const allowdDomains = [
-    'https://testna.app.scv.si',
-    'https://app.scv.si',
-    'http://localhost:3000',
-  ];
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowdDomains.indexOf(origin) > -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: [
+      'https://testna.app.scv.si',
+      'https://app.scv.si',
+      'http://localhost:3000',
+    ],
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe());
