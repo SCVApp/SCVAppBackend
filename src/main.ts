@@ -13,7 +13,7 @@ async function bootstrap() {
     origin: `${
       env.OAUTH_REDIRECT_URI == 'http://localhost:5050/auth/redirect/'
         ? 'http://localhost:3000'
-        : 'https://app.scv.si'
+        : /^(https:\/\/([^\.]*\.)?app.scv\.si)$/i
     }`,
     credentials: true,
   });

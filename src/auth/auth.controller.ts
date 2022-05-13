@@ -42,6 +42,12 @@ export class AuthController {
       case 'https://app.scv.si/':
         name = 'appscv';
         break;
+      case 'https://testna.app.scv.si/':
+        name = 'testnaappscv';
+        break;
+      case 'http://testna.app.scv.si/':
+        name = 'testnaappscv';
+        break;
     }
     let state = `${name}`;
 
@@ -70,6 +76,8 @@ export class AuthController {
     } else if (state == 'localhost') {
       //localhost
       return res.redirect('http://localhost:3000/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
+    } else if (state == 'testnaappscv') {
+      return res.redirect('https://testna.app.scv.si/?success=signin');
     }
     return res.redirect(
       `app://app.scv.si/mobileapp?accessToken=${token.accessToken}&refreshToken=${token.refreshToken}&expiresOn=${token.expiresOn}`,
