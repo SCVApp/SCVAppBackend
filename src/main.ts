@@ -15,8 +15,8 @@ async function bootstrap() {
     'http://localhost:3000',
   ];
   app.enableCors({
-    origin: function (origin, callback) {
-      if (allowdDomains.indexOf(origin) > -1) {
+    origin: (origin, callback) => {
+      if (!origin || allowdDomains.indexOf(origin) > -1) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
