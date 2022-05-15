@@ -60,8 +60,7 @@ export class AuthController {
     let code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
     let state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil
     if (code == '') {
-      //Preverimo če je koda praznaxw
-      res.cookie('test', 'test');
+      //Preverimo če je koda prazna
       throw new BadRequestException();
     }
 
@@ -69,7 +68,6 @@ export class AuthController {
     if (token) {
       await this.tokenService.saveToken(token, res);
     }
-
     if (state == 'appscv') {
       //app.scv.si
       return res.redirect('https://app.scv.si/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
