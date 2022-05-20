@@ -24,6 +24,12 @@ export class UserService {
     return client;
   }
 
+  async getMe(accessToken: string) {
+    const client = this.getClient(accessToken); //Uporabnik
+    let data = await client.api('/me').get();
+    return data;
+  }
+
   dobiUroIzUrnika($razred) {
     let ucitelj = '';
     let d = $razred.find('.text11').get()[0];

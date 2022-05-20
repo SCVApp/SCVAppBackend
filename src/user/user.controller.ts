@@ -30,8 +30,7 @@ export class UserController {
     if (!accessToken) {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
-    const client = this.userService.getClient(accessToken); //Uporabnik
-    let data = await client.api('/me').get(); //Z uporabnikovo funckijo get dobimo želene podatke
+    let data = await this.userService.getMe(accessToken); //Z uporabnikovo funckijo get dobimo želene podatke
 
     res.statusCode = 200;
 
