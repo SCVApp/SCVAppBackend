@@ -1,13 +1,17 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { AdminUser } from './adminUser.entity';
 
 @Entity('tickets')
 export class Ticket {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  zaporedno_st: number;
 
   @Column()
   type: string;
@@ -21,6 +25,20 @@ export class Ticket {
   @Column()
   sender: string;
 
+  @Column({ default: new Date() })
+  datum: Date;
+
   @ManyToMany(() => AdminUser, (adminUser) => adminUser.promission_tickets)
+  @JoinTable({
+    name: 'promission_tickets',
+    joinColumn: {
+      name: 'ticket',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'user',
+      referencedColumnName: 'id',
+    },
+  })
   promissions_users: AdminUser[];
 }

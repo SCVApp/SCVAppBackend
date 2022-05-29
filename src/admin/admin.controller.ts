@@ -22,10 +22,6 @@ import { TicketService } from 'src/ticket/ticket.service';
 
 @Controller('admin')
 export class AdminController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly ticketService: TicketService,
-  ) {}
 
   @Get('/')
   checkAdmin() {
@@ -144,20 +140,5 @@ export class AdminController {
     ).toString();
     let data = JSON.parse(dataText).schools;
     return data;
-  }
-
-  @Get('/ticket/all')
-  async getAllTickets(@Body() body) {
-    let accessToken = body.accessToken;
-    if (!accessToken) {
-      throw new UnauthorizedException('Nimate pravic dostopati do sem');
-    }
-    let getMe = await this.userService.getMe(accessToken);
-    let user: AdminUserDto = {
-      user_azure_id: getMe.id,
-      displayName: getMe.displayName,
-      email: getMe.mail,
-    };
-    return this.ticketService.getAll(user);
   }
 }

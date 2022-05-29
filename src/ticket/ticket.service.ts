@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MailDto } from 'src/mail/mail.dto';
+import { MailService } from 'src/mail/mail.service';
+import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AdminUserDto } from './dto/adminUser.dto';
+import { TicketDto } from './dto/ticket.dto';
 import { AdminUser } from './entities/adminUser.entity';
 import { Ticket } from './entities/ticket.entity';
 
@@ -12,12 +16,116 @@ export class TicketService {
     private readonly ticketReposetory: Repository<Ticket>,
     @InjectRepository(AdminUser)
     private readonly adminUserReposetory: Repository<AdminUser>,
+    private readonly mailService: MailService,
+    private readonly userService: UserService,
   ) {}
 
   async getUser(user: AdminUserDto): Promise<AdminUser> {
-    return this.adminUserReposetory.save(user);
+    let adUser = await this.adminUserReposetory.findOne(user);
+    if (adUser) {
+      return adUser;
+    }
+    return await this.adminUserReposetory.save(user);
   }
   async getAll(user: AdminUserDto): Promise<Ticket[] | undefined> {
     return (await this.getUser(user)).promission_tickets;
+  }
+
+  async createTicket(
+    ticket: TicketDto,
+    promissonUsers: AdminUser[],
+  ): Promise<Ticket> {
+    return await this.ticketReposetory.save({
+      ...ticket,
+      promissions_users: promissonUsers.map((e) => {
+        return { id: e.id };
+      }),
+    });
+  }
+
+  async loadMailsInToDB() {
+    let mails: MailDto[] = await this.getMail();
+    for (let mail of mails) {
+      let newTicket: TicketDto = {
+        ...mail,
+        type: 'odprto',
+      };
+      let permUsers = await this.adminUserReposetory.find({ isBoss: true });
+      console.log(mail);
+      await this.ticketReposetory.save({
+        ...newTicket,
+        promissions_users: permUsers.map((e) => {
+          return { id: e.id };
+        }),
+      });
+    }
+  }
+
+  async forwardTicket(id: number, userDto: AdminUserDto) {
+    let [ticket, user] = await Promise.all([
+      this.ticketReposetory.findOne(id),
+      this.getUser(userDto),
+    ]);
+    if (ticket && user) {
+      let permUsers = (await this.adminUserReposetory.find()).filter((u) => {
+        return (
+          u.promission_tickets.find((e) => e.id === ticket.id) !== undefined
+        );
+      });
+      let isItHasPerm =
+        permUsers.find((e) => e.user_azure_id === user.user_azure_id) !==
+        undefined;
+      if (!isItHasPerm) {
+        throw new UnauthorizedException('Nimaš pravice da urejaš ta ticket');
+      }
+    }
+  }
+
+  async getTicket(
+    id: number,
+    userDto: AdminUserDto,
+  ): Promise<Ticket | undefined> {
+    let [ticket, user] = await Promise.all([
+      this.ticketReposetory.findOne(id),
+      this.getUser(userDto),
+    ]);
+    if (ticket && user) {
+      if (user.promission_tickets.find((e) => e.id === ticket.id)) {
+        return ticket;
+      }
+      throw new UnauthorizedException(
+        'Nimate pravic dostopati do tega ticketa',
+      );
+    }
+    return undefined;
+  }
+
+  async getAdminUserDto(accessToken: string): Promise<AdminUserDto> {
+    let getMe = await this.userService.getMe(accessToken);
+    return {
+      user_azure_id: getMe.id,
+      displayName: getMe.displayName,
+      email: getMe.mail,
+    };
+  }
+
+  async getMail(): Promise<MailDto[]> {
+    return await this.mailService.readMail();
+  }
+
+  async changeType(id: number, newType: string, userDto: AdminUserDto) {
+    let [ticket, user] = await Promise.all([
+      this.ticketReposetory.findOne(id),
+      this.getUser(userDto),
+    ]);
+    if (ticket && user) {
+      if (user.promission_tickets.find((e) => e.id === ticket.id)) {
+        ticket.type = newType;
+        return await this.ticketReposetory.save(ticket);
+      }
+      throw new UnauthorizedException(
+        'Nimate pravic dostopati do tega ticketa',
+      );
+    }
   }
 }

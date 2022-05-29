@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Ticket } from './ticket.entity';
 
 @Entity('admin_users')
@@ -15,8 +22,12 @@ export class AdminUser {
   @Column()
   displayName: string;
 
+  @Column({ default: false })
+  isBoss: boolean;
+
   @ManyToMany(() => Ticket, (ticket) => ticket.promissions_users, {
     eager: true,
   })
+  @JoinColumn({ name: 'promission_tickets' })
   promission_tickets: Ticket[];
 }
