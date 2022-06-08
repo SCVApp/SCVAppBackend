@@ -21,7 +21,7 @@ export class TicketService {
   ) {}
 
   async getUser(user: AdminUserDto): Promise<AdminUser> {
-    let adUser = await this.adminUserReposetory.findOne(user);
+    let adUser = await this.adminUserReposetory.findOne({ where: user });
     if (adUser) {
       return adUser;
     }
@@ -50,7 +50,9 @@ export class TicketService {
         ...mail,
         type: 'odprto',
       };
-      let permUsers = await this.adminUserReposetory.find({ isBoss: true });
+      let permUsers = await this.adminUserReposetory.find({
+        where: { isBoss: true },
+      });
       console.log(mail);
       await this.ticketReposetory.save({
         ...newTicket,
@@ -63,7 +65,7 @@ export class TicketService {
 
   async forwardTicket(id: number, userDto: AdminUserDto) {
     let [ticket, user] = await Promise.all([
-      this.ticketReposetory.findOne(id),
+      this.ticketReposetory.findOne({ where: { id } }),
       this.getUser(userDto),
     ]);
     if (ticket && user) {
@@ -86,7 +88,7 @@ export class TicketService {
     userDto: AdminUserDto,
   ): Promise<Ticket | undefined> {
     let [ticket, user] = await Promise.all([
-      this.ticketReposetory.findOne(id),
+      this.ticketReposetory.findOne({ where: { id } }),
       this.getUser(userDto),
     ]);
     if (ticket && user) {
@@ -115,7 +117,7 @@ export class TicketService {
 
   async changeType(id: number, newType: string, userDto: AdminUserDto) {
     let [ticket, user] = await Promise.all([
-      this.ticketReposetory.findOne(id),
+      this.ticketReposetory.findOne({ where: { id } }),
       this.getUser(userDto),
     ]);
     if (ticket && user) {
