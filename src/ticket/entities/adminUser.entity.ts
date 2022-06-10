@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import {
   Column,
   Entity,
@@ -14,6 +15,7 @@ export class AdminUser {
   id: number;
 
   @Column()
+  @Exclude()
   user_azure_id: string;
 
   @Column()

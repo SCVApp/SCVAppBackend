@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
@@ -7,6 +8,7 @@ import {
   Post,
   Res,
   UnauthorizedException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 import SendmailTransport from 'nodemailer/lib/sendmail-transport';
@@ -70,5 +72,15 @@ export class TicketController {
     }
     let user = await this.ticketService.getAdminUserDto(accessToken);
     return this.ticketService.getTicket(id, user);
+  }
+
+  @Get('canForwardToUsers/:id')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async getUsersToForward(@Param('id', ParseIntPipe) id: number, @Body() body) {
+    let accessToken = body.accessToken;
+    if (!accessToken) {
+      throw new UnauthorizedException('Nimate pravic dostopati do sem');
+    }
+    return this.ticketService.getAdminUsersForForward(id);
   }
 }

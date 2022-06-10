@@ -49,9 +49,11 @@ export class MailService {
           } catch (e) {
             decodedEmail = await simpleParser(part.body);
           }
+          console.log(decodedEmail);
           if (decodedEmail.text !== '') {
             let sender: string = this.getSender(header.body.from[0] || '');
-            let zadeva: string = decodedEmail.text || '';
+            let zadeva: string =
+              decodedEmail.text || this.getHeaderLinesFromMail(decodedEmail);
             zadeva = zadeva.trim();
             let naslov: string = header.body.subject[0] || '';
             let datum: Date = new Date(header.body.date[0] || '');
@@ -88,4 +90,27 @@ export class MailService {
     if (f <= -1 || e <= -1) return sender;
     return sender.substring(f + 1, e);
   }
+
+  private getHeaderLinesFromMail(mail): string {
+    let headerLines = mail.headerLines;
+    if (headerLines.length < 1) return '';
+    return mail.headerLines
+      .map((line) => {
+        return line.line;
+      })
+      .join('\n');
+  }
 }
+
+// {
+//   attachments: [],
+//   headers: Map(0) {},
+//   headerLines: [ { key: '', line: 'test1234567890' } ],
+//   html: false
+// }
+// {
+//   sender: 'urban.krepel@scv.si',
+//   zadeva: '',
+//   naslov: 'test',
+//   datum: 2022-06-10T07:19:38.000Z
+// }

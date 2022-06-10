@@ -130,4 +130,18 @@ export class TicketService {
       );
     }
   }
+
+  async getAdminUsersForForward(id: number): Promise<AdminUser[]> {
+    let [tikcet, users] = await Promise.all([
+      this.ticketReposetory.findOne({ where: { id } }),
+      this.adminUserReposetory.find(),
+    ]);
+    return users.map((user) => {
+      if (
+        user.promission_tickets.find((e) => e.id === tikcet.id) === undefined
+      ) {
+        return user;
+      }
+    });
+  }
 }
