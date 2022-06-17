@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ChangeTypeDto {
   @IsNotEmpty()
@@ -8,6 +8,10 @@ export class ChangeTypeDto {
   @IsNotEmpty()
   @IsString()
   id: string;
+
+  @IsOptional()
+  @IsNumber()
+  forward_admin_user_id: number;
 
   accessToken: string;
 }

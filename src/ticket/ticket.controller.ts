@@ -39,17 +39,6 @@ export class TicketController {
     return 'ok';
   }
 
-  @Get('/forward')
-  async forwardTicket(@Body() body) {
-    let accessToken = body.accessToken;
-    if (!accessToken) {
-      throw new UnauthorizedException('Nimate pravic dostopati do sem');
-    }
-    let user = await this.ticketService.getAdminUserDto(accessToken);
-    this.ticketService.forwardTicket(20, user);
-    return 'ok';
-  }
-
   @Post('/changeType')
   async changeType(@Body() body: ChangeTypeDto) {
     let accessToken = body.accessToken;
@@ -57,6 +46,13 @@ export class TicketController {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
     let user = await this.ticketService.getAdminUserDto(accessToken);
+    if (body.newType === 'posredovano') {
+      await this.ticketService.forwardTicket(
+        parseInt(body.id),
+        user,
+        body.forward_admin_user_id,
+      );
+    }
     return await this.ticketService.changeType(
       parseInt(body.id),
       body.newType,

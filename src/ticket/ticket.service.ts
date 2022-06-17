@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailDto } from 'src/mail/mail.dto';
 import { MailService } from 'src/mail/mail.service';
@@ -53,7 +57,7 @@ export class TicketService {
       let permUsers = await this.adminUserReposetory.find({
         where: { isBoss: true },
       });
-      console.log(mail);
+
       await this.ticketReposetory.save({
         ...newTicket,
         promissions_users: permUsers.map((e) => {
@@ -63,23 +67,37 @@ export class TicketService {
     }
   }
 
-  async forwardTicket(id: number, userDto: AdminUserDto) {
-    let [ticket, user] = await Promise.all([
-      this.ticketReposetory.findOne({ where: { id } }),
-      this.getUser(userDto),
-    ]);
-    if (ticket && user) {
-      let permUsers = (await this.adminUserReposetory.find()).filter((u) => {
-        return (
-          u.promission_tickets.find((e) => e.id === ticket.id) !== undefined
-        );
-      });
-      let isItHasPerm =
-        permUsers.find((e) => e.user_azure_id === user.user_azure_id) !==
-        undefined;
-      if (!isItHasPerm) {
-        throw new UnauthorizedException('Nimaš pravice da urejaš ta ticket');
+  async forwardTicket(
+    id: number,
+    userDto: AdminUserDto,
+    userToForwardId: number,
+  ) {
+    try {
+      let [ticket, user, userToForward] = await Promise.all([
+        this.ticketReposetory.findOne({ where: { id } }),
+        this.getUser(userDto),
+        this.adminUserReposetory.findOne({ where: { id: userToForwardId } }),
+      ]);
+      if (ticket && user && userToForward) {
+        let permUsers = (await this.adminUserReposetory.find()).filter((u) => {
+          return (
+            u.promission_tickets.find((e) => e.id === ticket.id) !== undefined
+          );
+        });
+        let isItHasPerm =
+          permUsers.find((e) => e.user_azure_id === user.user_azure_id) !==
+          undefined;
+        if (!isItHasPerm) {
+          throw new UnauthorizedException('Nimaš pravice da urejaš ta ticket');
+        }
+        await this.ticketReposetory.save({
+          ...ticket,
+          promissions_users: [...permUsers, userToForward],
+        });
       }
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException('Ticket ali admin ne obstajata');
     }
   }
 
@@ -132,16 +150,21 @@ export class TicketService {
   }
 
   async getAdminUsersForForward(id: number): Promise<AdminUser[]> {
-    let [tikcet, users] = await Promise.all([
-      this.ticketReposetory.findOne({ where: { id } }),
-      this.adminUserReposetory.find(),
-    ]);
-    return users.map((user) => {
-      if (
-        user.promission_tickets.find((e) => e.id === tikcet.id) === undefined
-      ) {
-        return user;
-      }
-    });
+    try {
+      let [tikcet, users] = await Promise.all([
+        this.ticketReposetory.findOne({ where: { id } }),
+        this.adminUserReposetory.find(),
+      ]);
+      return users.filter((user) => {
+        if (
+          user.promission_tickets.find((e) => e.id === tikcet.id) === undefined
+        ) {
+          return true;
+        }
+        return false;
+      });
+    } catch (e) {
+      throw new NotFoundException('Ticket ne obstaja');
+    }
   }
 }
