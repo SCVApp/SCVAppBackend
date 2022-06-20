@@ -49,11 +49,10 @@ export class MailService {
           } catch (e) {
             decodedEmail = await simpleParser(part.body);
           }
-          console.log(decodedEmail);
           if (decodedEmail.text !== '') {
             let sender: string = this.getSender(header.body.from[0] || '');
             let zadeva: string =
-              decodedEmail.text || this.getHeaderLinesFromMail(decodedEmail);
+              this.getHeaderLinesFromMail(decodedEmail) + decodedEmail.text;
             zadeva = zadeva.trim();
             let naslov: string = header.body.subject[0] || '';
             let datum: Date = new Date(header.body.date[0] || '');

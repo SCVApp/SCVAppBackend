@@ -211,7 +211,7 @@ export class UserService {
       .responseType(ResponseType.JSON)
       .get();
 
-    let razred =
+    let razred = // Če je uporabnik učenec, potem ima skupino v katerem razredu je
       data.value.find(
         (e) =>
           e.mailEnabled == true &&
@@ -247,6 +247,7 @@ export class UserService {
         selectedSchool.razred = razred.displayName;
       } else {
         let idSole = data.value.find(
+          // ce je uporabnik ucitelj pogledamo njegove skupine, kjer ima skupino kratice šole na kateri uči
           (e) =>
             e.mailEnabled == false &&
             e.securityEnabled == true &&
@@ -427,7 +428,7 @@ export class UserService {
 
     const ureDanes = ($, razporedUr) => {
       return razporedUr.map((razporedUre, i) => {
-        let trenutniCas = new Date(DateTime.now().setLocale('sl-SI').ts);
+        let trenutniCas = new Date(DateTime.now().setLocale('sl-SI').ts); // Dobimo trenutni cas
         let year = trenutniCas.getFullYear();
         let month =
           trenutniCas.getMonth() + 1 < 10
@@ -436,22 +437,22 @@ export class UserService {
         let day =
           trenutniCas.getDate() < 10
             ? `0${trenutniCas.getDate()}`
-            : trenutniCas.getDate();
-        // let day = 14
-        let id = razporedUre.id;
-        let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`;
+            : trenutniCas.getDate(); // dobimo trenutni dan, za katerega dobimo urnik
+        // let day = 13; //spremeni dan na iskanega urnika
+        let id = razporedUre.id; // Vsako okno ima id za katero uro gre (npr. okno za 1. uro ima id 1)
+        let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`; // Dobimo ID(v HTML-ju) elementa okna iz katerega dobimo predmet, ucitelja, ali je nadomescanje ...
 
         let ura = uraZdaj($, selectorForClass);
         if (ura.length < 1 && razporedUr.length == i + 1) {
           ura = uraZdaj(
             $,
             `#ednevnik-seznam_ur_teden-td-Po-${year}-${month}-${day}`,
-          );
+          ); //Preverimo ali imajo kaj po po pouku
         } else if (ura.length < 1 && i == 0) {
           ura = uraZdaj(
             $,
             `#ednevnik-seznam_ur_teden-td-Pr-${year}-${month}-${day}`,
-          );
+          ); //Preverimo imajo pred uro na urniku
         }
 
         return {
