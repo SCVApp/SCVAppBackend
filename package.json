@@ -46,7 +46,7 @@
     "html-to-text": "^8.2.0",
     "imap-simple": "^5.1.0",
     "isomorphic-fetch": "^3.0.0",
-    "luxon": "^2.4.0",
+    "luxon": "^2.5.0",
     "mailparser": "^3.5.0",
     "nestjs-easyconfig": "^2.5.3",
     "nestjs-session": "^2.0.0",
