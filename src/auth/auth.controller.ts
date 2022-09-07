@@ -78,7 +78,7 @@ export class AuthController {
       return res.redirect('https://testna.app.scv.si/?success=signin');
     }
     return res.redirect(
-      `app://app.scv.si/mobileapp?accessToken=${token.accessToken}&refreshToken=${token.refreshToken}&expiresOn=${token.expiresOn}`,
+      `scvapp://app.scv.si/mobileapp?accessToken=${token.accessToken}&refreshToken=${token.refreshToken}&expiresOn=${token.expiresOn}`,
     );
   }
 
