@@ -59,7 +59,7 @@ export class AuthController {
     // Funkcija za preusmeritev iz Microsofta po prijavi
     let code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
     let state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil
-    if (code == '') {
+    if (code === '') {
       //Preverimo če je koda prazna
       throw new BadRequestException();
     }
@@ -68,13 +68,13 @@ export class AuthController {
     if (token) {
       await this.tokenService.saveToken(token, res);
     }
-    if (state == 'appscv') {
+    if (state === 'appscv') {
       //app.scv.si
       return res.redirect('https://app.scv.si/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
-    } else if (state == 'localhost') {
+    } else if (state === 'localhost') {
       //localhost
       return res.redirect('http://localhost:3000/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
-    } else if (state == 'testnaappscv') {
+    } else if (state === 'testnaappscv') {
       return res.redirect('https://testna.app.scv.si/?success=signin');
     }
     return res.redirect(
