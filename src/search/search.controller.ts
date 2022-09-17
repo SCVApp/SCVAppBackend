@@ -5,9 +5,11 @@ import {
   Get,
   HttpStatus,
   Param,
+  Query,
   Req,
   Res,
   UnauthorizedException,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { SearchService } from './search.service';
@@ -25,11 +27,10 @@ export class SearchController {
   async searchUser(
     @Req() req: Request,
     @Res() res: Response,
+    @Query('search', ValidationPipe) search: string,
     @Body() body,
   ): Promise<any> {
     //API url: https://graph.microsoft.com/v1.0/me/people/?$search=j&$top=10&$select=displayName,scoredEmailAddresses
-    let search = req.query.search || '';
-
     if (search === '' && typeof search !== 'string') {
       throw new BadRequestException('Ni parametra za iskanje');
     }
