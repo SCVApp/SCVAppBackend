@@ -30,7 +30,7 @@ export class SearchController {
     //API url: https://graph.microsoft.com/v1.0/me/people/?$search=j&$top=10&$select=displayName,scoredEmailAddresses
     let search = req.query.search || '';
 
-    if (search == '') {
+    if (search === '' && typeof search !== 'string') {
       throw new BadRequestException('Ni parametra za iskanje');
     }
 
