@@ -36,9 +36,9 @@ export class UserMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Nimate pravic dostopati do sem');
       }
       if (
-        (data.accessToken == '' ||
-          data.refreshToken == '' ||
-          data.expiresOn == '') &&
+        (data.accessToken === '' ||
+          data.refreshToken === '' ||
+          data.expiresOn === '') &&
         !authorization
       ) {
         throw new UnauthorizedException('Nimate pravic dostopati do sem');

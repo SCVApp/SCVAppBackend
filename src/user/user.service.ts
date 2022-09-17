@@ -173,7 +173,7 @@ export class UserService {
 
     let difference = zacetniCas.getTime() - trenutniCas.getTime();
     let differencString = this.izMillisekundVMinuteinSekunde(difference);
-    if (ura.ura.length == 0) {
+    if (ura.ura.length === 0) {
       ura.doUre = '/';
       ura.zacetekUreM = -1;
     } else {
@@ -249,9 +249,9 @@ export class UserService {
         let idSole = data.value.find(
           // ce je uporabnik ucitelj pogledamo njegove skupine, kjer ima skupino kratice šole na kateri uči
           (e) =>
-            e.mailEnabled == false &&
-            e.securityEnabled == true &&
-            e.groupTypes.length == 0 &&
+            e.mailEnabled === false &&
+            e.securityEnabled === true &&
+            e.groupTypes.length === 0 &&
             Object.keys(SchoolsInfo).includes(e.displayName),
         );
         if (idSole) {
@@ -443,12 +443,12 @@ export class UserService {
         let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`; // Dobimo ID(v HTML-ju) elementa okna iz katerega dobimo predmet, ucitelja, ali je nadomescanje ...
 
         let ura = uraZdaj($, selectorForClass);
-        if (ura.length < 1 && razporedUr.length == i + 1) {
+        if (ura.length < 1 && razporedUr.length === i + 1) {
           ura = uraZdaj(
             $,
             `#ednevnik-seznam_ur_teden-td-Po-${year}-${month}-${day}`,
           ); //Preverimo ali imajo kaj po po pouku
-        } else if (ura.length < 1 && i == 0) {
+        } else if (ura.length < 1 && i === 0) {
           ura = uraZdaj(
             $,
             `#ednevnik-seznam_ur_teden-td-Pr-${year}-${month}-${day}`,

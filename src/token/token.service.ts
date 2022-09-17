@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import { env } from 'process';
 import { TokenDto } from 'src/token/token.tdo';
 import { Token } from './token.class';
@@ -10,13 +10,14 @@ import { JwtService } from '@nestjs/jwt';
 export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
-  getCookieOptions() {
+  getCookieOptions(): CookieOptions {
     return {
       httpOnly: true,
       domain:
         env.OAUTH_REDIRECT_URI === 'http://localhost:5050/auth/redirect/'
           ? 'localhost'
           : 'app.scv.si',
+      secure: env.OAUTH_REDIRECT_URI !== 'http://localhost:5050/auth/redirect/',
     };
   }
 
