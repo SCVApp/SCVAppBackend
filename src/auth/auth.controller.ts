@@ -13,7 +13,7 @@ import {
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { TokenDto } from '../token/token.tdo';
+import { TokenDto } from '../token/token.dto';
 import { TokenService } from 'src/token/token.service';
 
 @Controller('auth')

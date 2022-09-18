@@ -2,7 +2,7 @@ import { BadGatewayException, Injectable } from '@nestjs/common';
 import { env } from 'process';
 import clientApplication from 'src/application/clientApplication';
 import { Token } from 'src/token/token.class';
-import { TokenDto } from '../token/token.tdo';
+import { TokenDto } from '../token/token.dto';
 
 @Injectable()
 export class AuthService {

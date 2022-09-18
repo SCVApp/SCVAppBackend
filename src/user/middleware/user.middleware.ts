@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
-import { Token } from 'src/token/token.class';
-import { TokenService } from 'src/token/token.service';
+import { Token } from '../../token/token.class';
+import { TokenService } from '../../token/token.service';
 
 @Injectable()
 export class UserMiddleware implements NestMiddleware {

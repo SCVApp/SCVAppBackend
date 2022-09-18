@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 import { env } from 'process';
-import { TokenDto } from 'src/token/token.tdo';
 import { Token } from './token.class';
 import fetch from 'node-fetch';
 import { JwtService } from '@nestjs/jwt';
