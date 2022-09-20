@@ -17,6 +17,7 @@ import { AdminMiddleware } from './admin/middleware/admin.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TicketModule } from './ticket/ticket.module';
 import { MailModule } from './mail/mail.module';
+import { PassModule } from './pass/pass.module';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ dotenv.config();
     }),
     TicketModule,
     MailModule,
+    PassModule,
   ],
   controllers: [AppController],
 })
