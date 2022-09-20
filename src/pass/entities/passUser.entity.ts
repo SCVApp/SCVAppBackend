@@ -22,7 +22,7 @@ export class UserPassEntity {
   })
   access_level: UserAccessLevel;
 
-  @Column()
+  @Column({ nullable: true })
   rfid_card_id: string;
 
   @ManyToMany(

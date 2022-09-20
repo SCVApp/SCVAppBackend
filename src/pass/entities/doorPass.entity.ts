@@ -18,7 +18,8 @@ export class DoorPassEntity {
   })
   minimum_allways_access_level: UserAccessLevel;
 
-
+  @Column({ comment: 'What is the code to access this door.' })
+  code: string;
 
   @ManyToMany(
     (type) => UserPassEntity,
