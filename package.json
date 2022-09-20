@@ -41,7 +41,7 @@
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.1",
     "express-session": "^1.17.3",
-    "fastify": "^3.29.1",
+    "fastify": "^3.29.2",
     "fastify-cookie": "^5.7.0",
     "html-to-text": "^8.2.1",
     "imap-simple": "^5.1.0",
