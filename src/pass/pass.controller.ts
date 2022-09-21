@@ -9,6 +9,6 @@ export class PassController {
   @Post('create_door')
   @HttpCode(201)
   createDoorPass(@Body() data: CreateDoorPassDto) {
-    return this.passService.createDoorPass(data);
+    return this.passService.createDoorPass(data, '');
   }
 }

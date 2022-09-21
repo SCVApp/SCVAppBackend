@@ -5,7 +5,6 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { UserAccessLevel } from '../enums/userAccessLevel.enum';
 import { DoorPassEntity } from './doorPass.entity';
 
 @Entity('user_passes')
@@ -15,12 +14,6 @@ export class UserPassEntity {
 
   @Column()
   azure_id: string;
-
-  @Column({
-    type: 'enum',
-    enum: UserAccessLevel,
-  })
-  access_level: UserAccessLevel;
 
   @Column({ nullable: true })
   rfid_card_id: string;

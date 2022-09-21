@@ -11,22 +11,16 @@ import {
   UnauthorizedException,
   ValidationPipe,
 } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
 import { SearchService } from './search.service';
 import { Request, Response } from 'express';
-import { ResponseType } from '@microsoft/microsoft-graph-client';
 
 @Controller('search')
 export class SearchController {
-  constructor(
-    private readonly searchService: SearchService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly searchService: SearchService) {}
 
   @Get('/user/')
   async searchUser(
-    @Req() req: Request,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
     @Query('search', ValidationPipe) search: string,
     @Body() body,
   ): Promise<any> {
@@ -39,41 +33,23 @@ export class SearchController {
     if (!accessToken) {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
-    const client = this.userService.getClient(accessToken);
-
-    let searchUrl = `/users/`;
-
-    let data = await client
-      .api(searchUrl)
-      .responseType(ResponseType.JSON)
-      .header('ConsistencyLevel', 'eventual')
-      .filter("endswith(mail,'@scv.si')")
-      .search(`"displayName:${search}"`)
-      .get();
-
-    return res.json(data);
+    return this.searchService.search(accessToken, search);
   }
 
   @Get('/specificUser/:id')
   async searchSpecificUser(
     @Body() body,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
   ) {
     if (id == '') {
-      return res.json({});
+      return {};
     }
 
     let accessToken = body.accessToken;
     if (!accessToken) {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
-    const client = this.userService.getClient(accessToken);
-
-    let searchUrl = `/users/${id}/presence`;
-
-    let data = await client.api(searchUrl).get();
-
-    return res.json(data);
+    return this.searchService.searchSpecificUser(accessToken, id);
   }
 }
