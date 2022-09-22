@@ -80,17 +80,13 @@ export class PassService {
     if (accessToken === '') {
       throw new UnauthorizedException();
     }
-    const userFromAzure = await this.searchService.searchSpecificUser(
-      accessToken,
-      user.azure_id,
-    );
-    if (!userFromAzure || !userFromAzure.id) {
+    if (!user) {
       return { accessLevel: UserAccessLevel.noaccess, razred: null };
     }
     const client = this.userService.getClient(accessToken);
     const [usersSchool, isAdmin] = await Promise.all([
       this.userService.getUsersSchool(client),
-      this.adminService.checkAdmin(accessToken, client),
+      this.adminService.checkAdmin(accessToken, client, user.azure_id),
     ]);
     if (isAdmin) {
       return { accessLevel: UserAccessLevel.admin, razred: null };

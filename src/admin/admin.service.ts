@@ -5,16 +5,24 @@ import { UserService } from 'src/user/user.service';
 @Injectable()
 export class AdminService {
   constructor(private readonly userService: UserService) {}
-  async checkAdmin(accessToken: string, client_: Client = null) {
+  async checkAdmin(
+    accessToken: string,
+    client_: Client = null,
+    userId: string = null,
+  ) {
     if (!accessToken) {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
-    let client = this.userService.getClient(accessToken);
-    if (client_ != null) {
-      client = client_;
+    let client = client_;
+    if (client === null) {
+      client = this.userService.getClient(accessToken);
     }
-    let data = await client
-      .api('/me/ownedObjects/microsoft.graph.application')
+    let apiLink = 'me';
+    if (userId !== null) {
+      apiLink = `users/${userId}`;
+    }
+    const data = await client
+      .api(`/${apiLink}/ownedObjects/microsoft.graph.application`)
       .get();
     let values = data.value;
     for (let i = 0; i < values.length; i++) {
