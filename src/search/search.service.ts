@@ -25,7 +25,7 @@ export class SearchService {
   async searchSpecificUser(accessToken: string, id: string) {
     const client = this.userService.getClient(accessToken);
 
-    let searchUrl = `/users/${id}/presence`;
+    let searchUrl = `/users/${id}`;
 
     let data = await client.api(searchUrl).get();
 

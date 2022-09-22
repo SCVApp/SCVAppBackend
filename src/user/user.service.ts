@@ -231,6 +231,7 @@ export class UserService {
       schoolUrl: 'https://www.scv.si/sl/',
       name: 'Šolski center Velenje',
       razred: '',
+      je_ucitelj: false,
     };
 
     let eASchoolsLinksText = (
@@ -254,8 +255,18 @@ export class UserService {
             e.groupTypes.length === 0 &&
             Object.keys(SchoolsInfo).includes(e.displayName),
         );
+        let uciteljGrupa = data.value.find(
+          (e) =>
+            e.mailEnabled === true &&
+            e.securityEnabled === true &&
+            e.groupTypes.length === 0 &&
+            e.displayName === 'pedagosko.osebje',
+        );
         if (idSole) {
           selectedSchool.id = idSole.displayName;
+          if (uciteljGrupa !== undefined) {
+            selectedSchool.je_ucitelj = true;
+          }
         }
       }
     });
