@@ -203,10 +203,14 @@ export class UserService {
     return ucilina.slice(0, index);
   }
 
-  async getUsersSchool(client) {
+  async getUsersSchool(client: Client, userId: string = null) {
+    let apiUrl: string = 'me';
+    if (userId !== null) {
+      apiUrl = `users/${userId}`;
+    }
     const data = await client
       .api(
-        '/me/memberOf?$select=groupTypes,mailEnabled,securityEnabled,displayName',
+        `/${apiUrl}/memberOf?$select=groupTypes,mailEnabled,securityEnabled,displayName`,
       )
       .responseType(ResponseType.JSON)
       .get();

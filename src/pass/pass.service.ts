@@ -85,7 +85,7 @@ export class PassService {
     }
     const client = this.userService.getClient(accessToken);
     const [usersSchool, isAdmin] = await Promise.all([
-      this.userService.getUsersSchool(client),
+      this.userService.getUsersSchool(client, user.azure_id),
       this.adminService.checkAdmin(accessToken, client, user.azure_id),
     ]);
     if (isAdmin) {
