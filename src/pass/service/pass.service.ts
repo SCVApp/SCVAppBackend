@@ -85,15 +85,15 @@ export class PassService {
     }
 
     const doesUserHaveAccessLevel = user.access_level !== null;
-    const dateOfLastAccessLevelChange = user.access_level_updated_at;
     const dateNow = new Date();
-    const accessLevelExpiration = dateNow.getTime() - 1000 * 60 * 60 * 24 * 30;
+    if (doesUserHaveAccessLevel) {
+      const dateOfLastAccessLevelChange = user.access_level_updated_at;
+      const accessLevelExpiration =
+        dateNow.getTime() - 1000 * 60 * 60 * 24 * 30;
 
-    if (
-      doesUserHaveAccessLevel &&
-      dateOfLastAccessLevelChange.getTime() <= accessLevelExpiration
-    ) {
-      return { accessLevel: user.access_level, razred: user.razred };
+      if (dateOfLastAccessLevelChange.getTime() >= accessLevelExpiration) {
+        return { accessLevel: user.access_level, razred: user.razred };
+      }
     }
 
     const client = this.userService.getClient(accessToken);

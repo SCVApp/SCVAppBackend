@@ -10,9 +10,12 @@ import { readFile } from 'fs/promises';
 import { env } from 'process';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { CacheService } from './cache/cache.service';
 
 @Injectable()
 export class UserService {
+  constructor(private readonly cacheService: CacheService) {}
+
   getClient(accessToken: string) {
     const client = Client.init({
       defaultVersion: 'v1.0',
@@ -284,7 +287,7 @@ export class UserService {
     return selectedSchool;
   }
 
-  changeUserData(status: string) {
+  changeUserStatus(status: string) {
     let availability = '';
     let activity = '';
 
@@ -391,95 +394,108 @@ export class UserService {
       console.log('Bad');
       throw new BadRequestException();
     }
-    let htmlData = await (await axios.get(urlZaUrnik)).data;
-    const $ = cheerio.load(htmlData);
-    let idForSelecting = 0;
-    const DobiRazporedUr = ($) =>
-      $('.ednevnik-seznam_ur_teden-ura')
-        .map((i, razporedUr) => {
-          const $razporedUr = $(razporedUr);
-          let ime = $razporedUr.find('.text14').text();
-          if (ime == '1. ura' && idForSelecting != 1) {
-            idForSelecting = 1;
-          }
-          idForSelecting += 1;
-          return {
-            id: idForSelecting - 1,
-            ime: $razporedUr.find('.text14').text(),
-            trajanje: $razporedUr.find('.text10').text(),
-            ura: null,
-          };
-        })
-        .toArray();
-    let razporedUr = DobiRazporedUr($);
 
-    // ednevnik-seznam_ur_teden-td-1-2022-02-18
-
-    const blokUraZdaj = ($, ura) => {
-      let $ura = $(ura);
-      return this.dobiUroIzUrnika($ura);
-    };
-
-    const uraZdaj = ($, selectorForClass) =>
-      $(selectorForClass)
-        .map((i, razred) => {
-          const $razred = $(razred);
-
-          if ($razred.children().length > 1) {
-            let ure = [];
-            let ura = $razred.children()[0];
-            ure.push(blokUraZdaj($, ura));
-            let blok = $($razred.children()[1]).children() || [];
-            for (let i = 0; i < blok.length; i++) {
-              let child = blok[i];
-              ure.push(blokUraZdaj($, child));
+    // let ureDanesNaUrniku = null;
+    let ureDanesNaUrniku = await this.cacheService.getUrnik(
+      selectedSchool.razred,
+      selectedSchool.id,
+    );
+    if (!ureDanesNaUrniku) {
+      let htmlData = await (await axios.get(urlZaUrnik)).data;
+      const $ = cheerio.load(htmlData);
+      let idForSelecting = 0;
+      const DobiRazporedUr = ($) =>
+        $('.ednevnik-seznam_ur_teden-ura')
+          .map((i, razporedUr) => {
+            const $razporedUr = $(razporedUr);
+            let ime = $razporedUr.find('.text14').text();
+            if (ime == '1. ura' && idForSelecting != 1) {
+              idForSelecting = 1;
             }
+            idForSelecting += 1;
+            return {
+              id: idForSelecting - 1,
+              ime: $razporedUr.find('.text14').text(),
+              trajanje: $razporedUr.find('.text10').text(),
+              ura: null,
+            };
+          })
+          .toArray();
+      let razporedUr = DobiRazporedUr($);
 
-            return ure;
+      // ednevnik-seznam_ur_teden-td-1-2022-02-18
+
+      const blokUraZdaj = ($, ura) => {
+        let $ura = $(ura);
+        return this.dobiUroIzUrnika($ura);
+      };
+
+      const uraZdaj = ($, selectorForClass) =>
+        $(selectorForClass)
+          .map((i, razred) => {
+            const $razred = $(razred);
+
+            if ($razred.children().length > 1) {
+              let ure = [];
+              let ura = $razred.children()[0];
+              ure.push(blokUraZdaj($, ura));
+              let blok = $($razred.children()[1]).children() || [];
+              for (let i = 0; i < blok.length; i++) {
+                let child = blok[i];
+                ure.push(blokUraZdaj($, child));
+              }
+
+              return ure;
+            }
+            return this.dobiUroIzUrnika($razred);
+          })
+          .toArray();
+
+      const ureDanes = ($, razporedUr) => {
+        return razporedUr.map((razporedUre, i) => {
+          let trenutniCas = new Date(DateTime.now().setLocale('sl-SI').ts); // Dobimo trenutni cas
+          let year = trenutniCas.getFullYear();
+          let month =
+            trenutniCas.getMonth() + 1 < 10
+              ? `0${trenutniCas.getMonth() + 1}`
+              : trenutniCas.getMonth() + 1;
+          // let day =
+          //   trenutniCas.getDate() < 10
+          //     ? `0${trenutniCas.getDate()}`
+          //     : trenutniCas.getDate(); // dobimo trenutni dan, za katerega dobimo urnik
+          let day = '23'; //spremeni dan na iskanega urnika format: 08, 07, 10, ...
+          let id = razporedUre.id; // Vsako okno ima id za katero uro gre (npr. okno za 1. uro ima id 1)
+          let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`; // Dobimo ID(v HTML-ju) elementa okna iz katerega dobimo predmet, ucitelja, ali je nadomescanje ...
+
+          let ura = uraZdaj($, selectorForClass);
+          if (ura.length < 1 && razporedUr.length === i + 1) {
+            ura = uraZdaj(
+              $,
+              `#ednevnik-seznam_ur_teden-td-Po-${year}-${month}-${day}`,
+            ); //Preverimo ali imajo kaj po po pouku
+          } else if (ura.length < 1 && i === 0) {
+            ura = uraZdaj(
+              $,
+              `#ednevnik-seznam_ur_teden-td-Pr-${year}-${month}-${day}`,
+            ); //Preverimo imajo pred uro na urniku
           }
-          return this.dobiUroIzUrnika($razred);
-        })
-        .toArray();
 
-    const ureDanes = ($, razporedUr) => {
-      return razporedUr.map((razporedUre, i) => {
-        let trenutniCas = new Date(DateTime.now().setLocale('sl-SI').ts); // Dobimo trenutni cas
-        let year = trenutniCas.getFullYear();
-        let month =
-          trenutniCas.getMonth() + 1 < 10
-            ? `0${trenutniCas.getMonth() + 1}`
-            : trenutniCas.getMonth() + 1;
-        let day =
-          trenutniCas.getDate() < 10
-            ? `0${trenutniCas.getDate()}`
-            : trenutniCas.getDate(); // dobimo trenutni dan, za katerega dobimo urnik
-        // let day = '08'; //spremeni dan na iskanega urnika format: 08, 07, 10, ...
-        let id = razporedUre.id; // Vsako okno ima id za katero uro gre (npr. okno za 1. uro ima id 1)
-        let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`; // Dobimo ID(v HTML-ju) elementa okna iz katerega dobimo predmet, ucitelja, ali je nadomescanje ...
+          return {
+            id: razporedUre.id,
+            ime: razporedUre.ime,
+            trajanje: razporedUre.trajanje,
+            ura: ura || null,
+          };
+        });
+      }; //Konec ure danes
 
-        let ura = uraZdaj($, selectorForClass);
-        if (ura.length < 1 && razporedUr.length === i + 1) {
-          ura = uraZdaj(
-            $,
-            `#ednevnik-seznam_ur_teden-td-Po-${year}-${month}-${day}`,
-          ); //Preverimo ali imajo kaj po po pouku
-        } else if (ura.length < 1 && i === 0) {
-          ura = uraZdaj(
-            $,
-            `#ednevnik-seznam_ur_teden-td-Pr-${year}-${month}-${day}`,
-          ); //Preverimo imajo pred uro na urniku
-        }
-
-        return {
-          id: razporedUre.id,
-          ime: razporedUre.ime,
-          trajanje: razporedUre.trajanje,
-          ura: ura || null,
-        };
-      });
-    }; //Konec ure danes
-
-    let ureDanesNaUrniku = ureDanes($, razporedUr);
+      ureDanesNaUrniku = ureDanes($, razporedUr);
+      this.cacheService.saveOrUpdateRazred(
+        ureDanesNaUrniku,
+        selectedSchool.razred,
+        selectedSchool.id,
+      );
+    }
     let trenutnoNaUrniku = this.kajJeSedejNaUrniku(ureDanesNaUrniku);
     return {
       urnik: ureDanesNaUrniku,
