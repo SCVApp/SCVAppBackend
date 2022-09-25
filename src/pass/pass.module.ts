@@ -13,6 +13,7 @@ import { SearchModule } from 'src/search/search.module';
 import { UserModule } from 'src/user/user.module';
 import { AdminModule } from 'src/admin/admin.module';
 import { AdminMiddleware } from 'src/admin/middleware/admin.middleware';
+import { PassGateway } from './pass.gateway';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { AdminMiddleware } from 'src/admin/middleware/admin.middleware';
     UserModule,
     AdminModule,
   ],
-  providers: [PassService],
+  providers: [PassService, PassGateway],
   controllers: [PassController],
 })
 export class PassModule {}
