@@ -11,8 +11,8 @@ import { ObdobjeUre } from './obdobjeUre.entity';
 @Entity('ure')
 export class Ura {
   @Exclude()
-  @PrimaryGeneratedColumn()
-  public readonly primary_id: number;
+  @PrimaryGeneratedColumn('uuid')
+  public readonly primary_id: string;
 
   @Column()
   krajsava: string;

@@ -52,11 +52,18 @@ export class CacheService {
       return true;
     });
     if (!razred) {
-      await this.razredRepository.save({ name, id_sole, filterUrnik });
+      await this.razredRepository.save({
+        name,
+        id_sole,
+        urnik: filterUrnik,
+        updated_at: new Date(),
+      });
     } else {
       await this.obdobjeUreRepository.remove(razred.urnik);
       razred.urnik = filterUrnik;
+      razred.updated_at = new Date();
       await this.razredRepository.save(razred);
     }
   }
+
 }

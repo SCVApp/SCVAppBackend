@@ -9,8 +9,8 @@ import { ObdobjeUre } from './obdobjeUre.entity';
 
 @Entity('razredi')
 export class Razred {
-  @PrimaryGeneratedColumn()
-  public readonly id: number;
+  @PrimaryGeneratedColumn('uuid')
+  public readonly id: string;
 
   @Column()
   name: string;
@@ -18,7 +18,7 @@ export class Razred {
   @Column()
   id_sole: string;
 
-  @UpdateDateColumn()
+  @Column()
   updated_at: Date;
 
   @OneToMany((type) => ObdobjeUre, (obdobjeUre) => obdobjeUre.razred, {

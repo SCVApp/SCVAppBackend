@@ -13,8 +13,8 @@ import { Ura } from './ura.entity';
 @Entity('obdobje_ur')
 export class ObdobjeUre {
   @Exclude()
-  @PrimaryGeneratedColumn()
-  public readonly primary_id: number;
+  @PrimaryGeneratedColumn('uuid')
+  public readonly primary_id: string;
 
   @Column()
   id: number;
