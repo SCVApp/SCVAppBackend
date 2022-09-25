@@ -459,11 +459,11 @@ export class UserService {
             trenutniCas.getMonth() + 1 < 10
               ? `0${trenutniCas.getMonth() + 1}`
               : trenutniCas.getMonth() + 1;
-          // let day =
-          //   trenutniCas.getDate() < 10
-          //     ? `0${trenutniCas.getDate()}`
-          //     : trenutniCas.getDate(); // dobimo trenutni dan, za katerega dobimo urnik
-          let day = '23'; //spremeni dan na iskanega urnika format: 08, 07, 10, ...
+          let day =
+            trenutniCas.getDate() < 10
+              ? `0${trenutniCas.getDate()}`
+              : trenutniCas.getDate(); // dobimo trenutni dan, za katerega dobimo urnik
+          // let day = '23'; //spremeni dan na iskanega urnika format: 08, 07, 10, ...
           let id = razporedUre.id; // Vsako okno ima id za katero uro gre (npr. okno za 1. uro ima id 1)
           let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`; // Dobimo ID(v HTML-ju) elementa okna iz katerega dobimo predmet, ucitelja, ali je nadomescanje ...
 
