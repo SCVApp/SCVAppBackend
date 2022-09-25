@@ -49,6 +49,7 @@ export class CacheService {
         return false;
       });
       if (praznaUra) return false;
+      if (obdobje.ura.length === 0) return false;
       return true;
     });
     if (!razred) {
@@ -65,5 +66,4 @@ export class CacheService {
       await this.razredRepository.save(razred);
     }
   }
-
 }
