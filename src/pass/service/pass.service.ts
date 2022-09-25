@@ -16,6 +16,7 @@ import { AdminService } from 'src/admin/admin.service';
 import { UserService } from 'src/user/user.service';
 import { DoorPassEntity } from '../entities/doorPass.entity';
 import { CreateDoorPassDto } from '../dto/createDoorPass.dto';
+import { PassGateway } from '../pass.gateway';
 
 @Injectable()
 export class PassService {
@@ -27,7 +28,10 @@ export class PassService {
     private readonly searchService: SearchService,
     private readonly adminService: AdminService,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => PassGateway))
+    private readonly passGateway: PassGateway,
   ) {}
+  private openDoor: string[] = [];
   async getUserFromAzureId(azureId: string = '', accessToken: string) {
     if (accessToken === '') {
       throw new UnauthorizedException("accessToken can't be empty");
@@ -156,9 +160,22 @@ export class PassService {
     }
     const canUserOpenDoor = await this.canUserOpenDoor(door, user, accessToken);
     if (canUserOpenDoor) {
-      return { staus: 'success' };
+      this.passGateway.openDoor(door.code);
+      if (!this.openDoor.includes(door.code)) {
+        this.openDoor.push(door.code);
+      }
+      return { status: 'success' };
     }
     throw new UnauthorizedException("User doesn't have access to this door");
+  }
+
+  async DoorIsOpen(code: string) {
+    const doorIsOpened = this.openDoor.includes(code);
+    if (doorIsOpened) {
+      this.openDoor.splice(this.openDoor.indexOf(code), 1);
+      return true;
+    }
+    throw new BadRequestException('Door is not opened');
   }
 
   async compareHash(hash: string, string: string) {

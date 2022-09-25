@@ -42,4 +42,13 @@ export class PassController {
     }
     return await this.passService.openDoorWithCode(code, accessToken);
   }
+
+  @Get('door/is_opened')
+  @HttpCode(200)
+  async isDoorOpened(@Body() body: any) {
+    if (!body.door || !body.door.code) {
+      throw new UnauthorizedException('Nimate pravic dostopati do sem');
+    }
+    return this.passService.DoorIsOpen(body.door.code);
+  }
 }
