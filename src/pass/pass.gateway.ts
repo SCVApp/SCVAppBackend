@@ -33,7 +33,12 @@ export class PassGateway {
     }
   }
 
-  async openDoor(doorCode: string) {
+  async handleDisconnect(@ConnectedSocket() client: Socket) {
+    client._cleanup();
+    client.disconnect();
+  }
+
+  openDoor(doorCode: string) {
     this.server.to(doorCode).emit('open_door', doorCode);
   }
 }

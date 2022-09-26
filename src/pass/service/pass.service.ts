@@ -80,12 +80,22 @@ export class PassService {
   async getUserAccessLevel(
     user: UserPassEntity,
     accessToken: string,
-  ): Promise<{ accessLevel: UserAccessLevel; razred: string }> {
+  ): Promise<{
+    accessLevel: UserAccessLevel;
+    razred: string;
+    urlToUrnik: string;
+    schoolId: string;
+  }> {
     if (accessToken === '') {
       throw new UnauthorizedException("accessToken can't be empty");
     }
     if (!user) {
-      return { accessLevel: UserAccessLevel.noaccess, razred: null };
+      return {
+        accessLevel: UserAccessLevel.noaccess,
+        razred: null,
+        urlToUrnik: null,
+        schoolId: null,
+      };
     }
 
     const doesUserHaveAccessLevel = user.access_level !== null;
@@ -96,7 +106,12 @@ export class PassService {
         dateNow.getTime() - 1000 * 60 * 60 * 24 * 30;
 
       if (dateOfLastAccessLevelChange.getTime() >= accessLevelExpiration) {
-        return { accessLevel: user.access_level, razred: user.razred };
+        return {
+          accessLevel: user.access_level,
+          razred: user.razred,
+          urlToUrnik: null,
+          schoolId: null,
+        };
       }
     }
 
@@ -110,7 +125,12 @@ export class PassService {
         access_level: UserAccessLevel.admin,
         access_level_updated_at: dateNow,
       });
-      return { accessLevel: UserAccessLevel.admin, razred: null };
+      return {
+        accessLevel: UserAccessLevel.admin,
+        razred: null,
+        urlToUrnik: null,
+        schoolId: null,
+      };
     }
     if (usersSchool) {
       if (usersSchool.je_ucitelj === true) {
@@ -118,7 +138,12 @@ export class PassService {
           access_level: UserAccessLevel.teacher,
           access_level_updated_at: dateNow,
         });
-        return { accessLevel: UserAccessLevel.teacher, razred: null };
+        return {
+          accessLevel: UserAccessLevel.teacher,
+          razred: null,
+          urlToUrnik: null,
+          schoolId: null,
+        };
       }
       if (usersSchool.razred !== '' && usersSchool.id !== '') {
         await this.userPassRepository.update(user.id, {
@@ -129,6 +154,8 @@ export class PassService {
         return {
           accessLevel: UserAccessLevel.student,
           razred: usersSchool.razred,
+          urlToUrnik: usersSchool.urnikUrl,
+          schoolId: usersSchool.id,
         };
       }
     }
@@ -141,9 +168,44 @@ export class PassService {
   ) {
     const userAccessLevel = await this.getUserAccessLevel(user, accessToken);
     const minimum_allways_access_level = door.minimum_allways_access_level;
+    if (userAccessLevel.accessLevel === UserAccessLevel.noaccess) {
+      return false;
+    }
     if (userAccessLevel.accessLevel <= minimum_allways_access_level) {
       return true;
     }
+
+    if (userAccessLevel.accessLevel === UserAccessLevel.student) {
+      const razred = userAccessLevel.razred;
+      let urnikUrl = userAccessLevel.urlToUrnik;
+      let schoolId = userAccessLevel.schoolId;
+      if (!razred) {
+        return false;
+      }
+      if (razred && !urnikUrl) {
+        [urnikUrl, schoolId] =
+          await this.userService.getUserUrlForUrnikFromClass(razred);
+      }
+      if (!urnikUrl || !schoolId) {
+        return false;
+      }
+      const urnik = await this.userService.getUserschedule(
+        null,
+        razred,
+        schoolId,
+        urnikUrl,
+      );
+      const trenutnoNaUrniku = urnik.trenutnoNaUrniku;
+      const trenutneUre = trenutnoNaUrniku.ura;
+      const doorNameId = door.name_id;
+      const uraInDoorNameId = trenutneUre.find(
+        (ura) => ura.ucilnica === doorNameId,
+      );
+      if (uraInDoorNameId) {
+        return true;
+      }
+    }
+
     return false;
   }
 

@@ -206,6 +206,28 @@ export class UserService {
     return ucilina.slice(0, index);
   }
 
+  async getUserUrlForUrnikFromClass(classId: string) {
+    let eASchoolsLinksText = (
+      await readFile(`${process.cwd()}/src/schoolData/eaLinksOfSchools.json`)
+    ).toString();
+    let eASchoolsLinks = JSON.parse(eASchoolsLinksText).schools;
+    let userClassId = null;
+    let userSchoolUrl = null;
+    let userSchoolId = null;
+    eASchoolsLinks.forEach((school) => {
+      let classes = Object.keys(school.classes);
+      if (classes.includes(classId)) {
+        userClassId = school.classes[classId];
+        userSchoolUrl = school.mainLink;
+        userSchoolId = school.id;
+      }
+    });
+    if (userClassId === null || userSchoolUrl === null) {
+      return null;
+    }
+    return [`${userSchoolUrl}${userClassId}`, userSchoolId];
+  }
+
   async getUsersSchool(client: Client, userId: string = null) {
     let apiUrl: string = 'me';
     if (userId !== null) {
@@ -386,9 +408,21 @@ export class UserService {
     return statusData;
   }
 
-  async getUserschedule(client) {
-    let selectedSchool = await this.getUsersSchool(client);
-    const urlZaUrnik = selectedSchool.urnikUrl || '';
+  async getUserschedule(
+    client,
+    classId: string = null,
+    schoolId: string = null,
+    urnikUrl: string = null,
+  ) {
+    let selectedSchool = { razred: classId, id: schoolId, urnikUrl: urnikUrl };
+    let urlZaUrnik = urnikUrl;
+    if (!classId && !schoolId && !urnikUrl) {
+      if (!client) {
+        throw new BadRequestException();
+      }
+      selectedSchool = await this.getUsersSchool(client);
+      urlZaUrnik = selectedSchool.urnikUrl || '';
+    }
 
     if (urlZaUrnik == '') {
       console.log('Bad');
