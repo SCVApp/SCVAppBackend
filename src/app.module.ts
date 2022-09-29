@@ -55,11 +55,17 @@ export class AppModule implements NestModule {
         { path: 'user/logoutUrl', method: RequestMethod.GET },
         { path: 'user/logout', method: RequestMethod.GET },
       )
-      .forRoutes('user', 'search', 'pass/open_door/:code');
+      .forRoutes(
+        'user',
+        'search',
+        'pass/open_door/:code',
+        "'pass/get_door/:code'",
+      );
     consumer
       .apply(AdminMiddleware)
       .exclude(
         { path: 'pass/open_door/:code', method: RequestMethod.GET },
+        { path: 'pass/get_door/:code', method: RequestMethod.GET },
         { path: 'pass/door/is_opened', method: RequestMethod.GET },
       )
       .forRoutes('admin', 'pass');

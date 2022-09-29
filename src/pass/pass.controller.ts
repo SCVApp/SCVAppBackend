@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -41,6 +42,16 @@ export class PassController {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
     return await this.passService.openDoorWithCode(code, accessToken);
+  }
+
+  @Get('get_door/:code')
+  @HttpCode(200)
+  async getDoorPasses(@Param('code', ValidationPipe) code: string) {
+    const door = await this.passService.getDoorWithCode(code);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    return door.name_id;
   }
 
   @Get('door/is_opened')
