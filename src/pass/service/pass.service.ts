@@ -159,6 +159,10 @@ export class PassService {
         };
       }
     }
+    await this.userPassRepository.update(user.id, {
+      access_level: UserAccessLevel.noaccess,
+      access_level_updated_at: dateNow,
+    });
     return {
       accessLevel: UserAccessLevel.noaccess,
       razred: null,
