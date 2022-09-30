@@ -159,6 +159,12 @@ export class PassService {
         };
       }
     }
+    return {
+      accessLevel: UserAccessLevel.noaccess,
+      razred: null,
+      urlToUrnik: null,
+      schoolId: null,
+    };
   }
 
   async canUserOpenDoor(
