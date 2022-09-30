@@ -1,12 +1,10 @@
-import { Controller, Get, Session } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Query, Res, Session } from '@nestjs/common';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getHello(@Res() res: Response) {
+    return res.sendFile(`${process.cwd()}/src/pictures/nono.html`);
   }
 }
