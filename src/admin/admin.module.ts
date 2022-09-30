@@ -10,5 +10,6 @@ import { TicketModule } from 'src/ticket/ticket.module';
   imports: [TokenModule, CommonModule, UserModule, TokenModule, TicketModule],
   controllers: [AdminController],
   providers: [AdminService],
+  exports: [AdminService],
 })
 export class AdminModule {}

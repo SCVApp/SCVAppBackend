@@ -6,14 +6,14 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Token } from 'src/token/token.class';
 import { TokenService } from 'src/token/token.service';
-import { UserService } from 'src/user/user.service';
+import { AdminService } from '../admin.service';
 
 @Injectable()
 export class AdminMiddleware implements NestMiddleware {
   constructor(
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    private readonly adminService: AdminService,
   ) {}
   async use(req: any, res: any, next: () => void) {
     //Funkcija za pridebitev osnovnih uporabnikovih podatkov
@@ -68,7 +68,7 @@ export class AdminMiddleware implements NestMiddleware {
       if (token) {
         await this.tokenService.saveToken(token, res);
       }
-      if ((await this.checkAdmin(accessToken)) === true) {
+      if ((await this.adminService.checkAdmin(accessToken)) === true) {
         next();
       } else {
         throw new UnauthorizedException('Nimate pravic dostopati do sem');
@@ -79,30 +79,12 @@ export class AdminMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Nimate pravic dostopati do sem');
       } else {
         req.body.accessToken = authorization;
-        if ((await this.checkAdmin(authorization)) === true) {
+        if ((await this.adminService.checkAdmin(authorization)) === true) {
           next();
         } else {
           throw new UnauthorizedException('Nimate pravic dostopati do sem');
         }
       }
     }
-  }
-
-  async checkAdmin(accessToken: string) {
-    if (!accessToken) {
-      throw new UnauthorizedException('Nimate pravic dostopati do sem');
-    }
-    const client = this.userService.getClient(accessToken);
-    let data = await client
-      .api('/me/ownedObjects/microsoft.graph.application')
-      .get();
-    let values = data.value;
-    for (let i = 0; i < values.length; i++) {
-      let value = values[i];
-      if (value.appId === process.env.OAUTH_APP_ID) {
-        return true;
-      }
-    }
-    return false;
   }
 }

@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
 import { UserPassEntity } from './passUser.entity';
@@ -18,7 +19,12 @@ export class DoorPassEntity {
   })
   minimum_allways_access_level: UserAccessLevel;
 
+  @Column({ comment: 'What is the code to access this door.' })
+  code: string;
 
+  @Exclude()
+  @Column({ comment: 'What is the secret to access this door.' })
+  access_secret: string;
 
   @ManyToMany(
     (type) => UserPassEntity,

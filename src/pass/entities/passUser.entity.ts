@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
 import { DoorPassEntity } from './doorPass.entity';
@@ -16,14 +17,11 @@ export class UserPassEntity {
   @Column()
   azure_id: string;
 
-  @Column({
-    type: 'enum',
-    enum: UserAccessLevel,
-  })
+  @Column({ nullable: true, type: 'enum', enum: UserAccessLevel })
   access_level: UserAccessLevel;
 
-  @Column()
-  rfid_card_id: string;
+  @Column({ nullable: true })
+  razred: string;
 
   @ManyToMany(
     (type) => DoorPassEntity,
@@ -32,4 +30,7 @@ export class UserPassEntity {
   )
   @JoinTable()
   allways_door_passes: DoorPassEntity[];
+
+  @Column({ nullable: true })
+  access_level_updated_at: Date;
 }

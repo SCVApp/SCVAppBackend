@@ -125,7 +125,7 @@ export class UserController {
     }
     const client = this.userService.getClient(accessToken);
 
-    const postData = this.userService.changeUserData(status);
+    const postData = this.userService.changeUserStatus(status);
 
     const data = await client
       .api('/me/presence/setUserPreferredPresence')

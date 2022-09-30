@@ -18,6 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TicketModule } from './ticket/ticket.module';
 import { MailModule } from './mail/mail.module';
 import { PassModule } from './pass/pass.module';
+import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
 
 dotenv.config();
 
@@ -54,7 +55,21 @@ export class AppModule implements NestModule {
         { path: 'user/logoutUrl', method: RequestMethod.GET },
         { path: 'user/logout', method: RequestMethod.GET },
       )
-      .forRoutes('user', 'search');
-    consumer.apply(AdminMiddleware).forRoutes('admin');
+      .forRoutes(
+        'user',
+        'search',
+        'pass/open_door/:code',
+        "'pass/get_door/:code'",
+      );
+    consumer
+      .apply(AdminMiddleware)
+      .exclude(
+        { path: 'pass/open_door/:code', method: RequestMethod.GET },
+        { path: 'pass/get_door/:code', method: RequestMethod.GET },
+        { path: 'pass/door/is_opened', method: RequestMethod.GET },
+      )
+      .forRoutes('admin', 'pass');
+
+    consumer.apply(DoorPassMiddleware).forRoutes('pass/door/is_opened');
   }
 }
