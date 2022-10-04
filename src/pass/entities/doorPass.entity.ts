@@ -1,6 +1,13 @@
 import { Exclude } from 'class-transformer';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
+import { PassActivityLogEntity } from './passActivityLog.entity';
 import { UserPassEntity } from './passUser.entity';
 
 @Entity('door_passes')
@@ -32,4 +39,10 @@ export class DoorPassEntity {
     { cascade: ['insert'] },
   )
   allways_pass_users: UserPassEntity[];
+
+  @OneToMany(
+    (type) => PassActivityLogEntity,
+    (doorPassActivityLog) => doorPassActivityLog.door_pass,
+  )
+  activity_logs: PassActivityLogEntity[];
 }

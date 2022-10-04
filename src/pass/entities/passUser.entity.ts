@@ -4,10 +4,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
-  UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
 import { DoorPassEntity } from './doorPass.entity';
+import { PassActivityLogEntity } from './passActivityLog.entity';
 
 @Entity('user_passes')
 export class UserPassEntity {
@@ -33,4 +34,10 @@ export class UserPassEntity {
 
   @Column({ nullable: true })
   access_level_updated_at: Date;
+
+  @OneToMany(
+    (type) => PassActivityLogEntity,
+    (doorPassActivityLog) => doorPassActivityLog.user_pass,
+  )
+  activity_logs: PassActivityLogEntity[];
 }

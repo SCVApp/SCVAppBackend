@@ -12,13 +12,16 @@ import { UserPassEntity } from './entities/passUser.entity';
 import { SearchModule } from 'src/search/search.module';
 import { UserModule } from 'src/user/user.module';
 import { AdminModule } from 'src/admin/admin.module';
-import { AdminMiddleware } from 'src/admin/middleware/admin.middleware';
 import { PassGateway } from './pass.gateway';
-import { DoorPassMiddleware } from './middleware/doorPass.middleware';
+import { PassActivityLogEntity } from './entities/passActivityLog.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([DoorPassEntity, UserPassEntity]),
+    TypeOrmModule.forFeature([
+      DoorPassEntity,
+      UserPassEntity,
+      PassActivityLogEntity,
+    ]),
     SearchModule,
     UserModule,
     AdminModule,

@@ -17,6 +17,8 @@ import { UserService } from 'src/user/user.service';
 import { DoorPassEntity } from '../entities/doorPass.entity';
 import { CreateDoorPassDto } from '../dto/createDoorPass.dto';
 import { PassGateway } from '../pass.gateway';
+import { PassActivityLogEntity } from '../entities/passActivityLog.entity';
+import { PassActivityLogStatus } from '../enums/passActivityLogStatus.enum';
 
 @Injectable()
 export class PassService {
@@ -25,6 +27,8 @@ export class PassService {
     private readonly doorPassRepository: Repository<DoorPassEntity>,
     @InjectRepository(UserPassEntity)
     private readonly userPassRepository: Repository<UserPassEntity>,
+    @InjectRepository(PassActivityLogEntity)
+    private readonly passActivityLogRepository: Repository<PassActivityLogEntity>,
     private readonly searchService: SearchService,
     private readonly adminService: AdminService,
     private readonly userService: UserService,
@@ -219,6 +223,20 @@ export class PassService {
     return false;
   }
 
+  async saveAccessLog(
+    door: DoorPassEntity,
+    user: UserPassEntity,
+    status: PassActivityLogStatus,
+  ) {
+    console.log('saveAccessLog');
+    const activityLog = this.passActivityLogRepository.create({
+      door_pass: { id: door.id },
+      user_pass: { id: user.id },
+      status: status,
+    });
+    await this.passActivityLogRepository.save(activityLog);
+  }
+
   async openDoorWithCode(code: string, accessToken: string) {
     const [door, user] = await Promise.all([
       this.getDoorWithCode(code),
@@ -236,8 +254,10 @@ export class PassService {
       if (!this.openDoor.includes(door.code)) {
         this.openDoor.push(door.code);
       }
+      this.saveAccessLog(door, user, PassActivityLogStatus.success);
       return { status: 'success' };
     }
+    this.saveAccessLog(door, user, PassActivityLogStatus.fail);
     throw new UnauthorizedException("User doesn't have access to this door");
   }
 
