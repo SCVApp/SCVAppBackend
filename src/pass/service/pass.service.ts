@@ -6,7 +6,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { UserPassEntity } from '../entities/passUser.entity';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -176,19 +176,21 @@ export class PassService {
   }
 
   async userTimeOut(user: UserPassEntity) {
+    //check for logs that are created in last 30 seconds
+    const dateNow = new Date();
+    const date30SecondsAgo = new Date(dateNow.getTime() - 1000 * 30);
     const logs = await this.passActivityLogRepository.find({
-      where: { user_pass: user, status: PassActivityLogStatus.success },
-      order: { created_at: 'DESC' },
-      take: 3,
+      where: {
+        user_pass: user,
+        created_at: Between(date30SecondsAgo, dateNow),
+        status: PassActivityLogStatus.success,
+      },
     });
-    const dateNow = new Date().getTime();
-    const timeOut30s = dateNow - 1000 * 30;
-    const timeOut3s = dateNow - 1000 * 3;
+    if (logs.length > 3) {
+      return false;
+    }
     for (const log of logs) {
-      if (log.created_at.getTime() >= timeOut3s) {
-        return false;
-      }
-      if (log.created_at.getTime() >= timeOut30s && logs.length >= 3) {
+      if (log.created_at.getTime() + 1000 * 3 > dateNow.getTime()) {
         return false;
       }
     }
