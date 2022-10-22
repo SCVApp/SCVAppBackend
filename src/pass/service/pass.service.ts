@@ -304,10 +304,14 @@ export class PassService {
   async createDoorPass(data: CreateDoorPassDto, accessToken: string) {
     const doorPassCode = crypto.randomBytes(64).toString('hex');
     const accessSecret = crypto.randomBytes(256).toString('hex');
-    const [hashAccessSecret, users] = await Promise.all([
+    const [hashAccessSecret, users, existingDoor] = await Promise.all([
       bcrypt.hash(accessSecret, 10),
       this.getUsersFromAzureId(data.allways_pass_users_azure_ids, accessToken),
+      this.getDoorWithNameId(data.name_id),
     ]);
+    if (existingDoor) {
+      throw new BadRequestException('Door with this name_id already exists');
+    }
     await this.doorPassRepository.save({
       name_id: data.name_id,
       code: doorPassCode,
@@ -340,6 +344,15 @@ export class PassService {
     }
     return await this.doorPassRepository.findOne({
       where: { code: code },
+    });
+  }
+
+  async getDoorWithNameId(name_id: string) {
+    if (!name_id) {
+      return null;
+    }
+    return await this.doorPassRepository.findOne({
+      where: { name_id: name_id },
     });
   }
 }
