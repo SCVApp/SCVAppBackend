@@ -304,11 +304,10 @@ export class PassService {
   async createDoorPass(data: CreateDoorPassDto, accessToken: string) {
     const doorPassCode = crypto.randomBytes(64).toString('hex');
     const accessSecret = crypto.randomBytes(256).toString('hex');
-    const hashAccessSecret = await bcrypt.hash(accessSecret, 10);
-    const users = await this.getUsersFromAzureId(
-      data.allways_pass_users_azure_ids,
-      accessToken,
-    );
+    const [hashAccessSecret, users] = await Promise.all([
+      bcrypt.hash(accessSecret, 10),
+      this.getUsersFromAzureId(data.allways_pass_users_azure_ids, accessToken),
+    ]);
     await this.doorPassRepository.save({
       name_id: data.name_id,
       code: doorPassCode,
