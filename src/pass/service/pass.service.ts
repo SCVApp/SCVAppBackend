@@ -175,14 +175,40 @@ export class PassService {
     };
   }
 
+  async userTimeOut(user: UserPassEntity) {
+    const logs = await this.passActivityLogRepository.find({
+      where: { user_pass: user, status: PassActivityLogStatus.success },
+      order: { created_at: 'DESC' },
+      take: 3,
+    });
+    const dateNow = new Date().getTime();
+    const timeOut30s = dateNow - 1000 * 30;
+    const timeOut3s = dateNow - 1000 * 3;
+    for (const log of logs) {
+      if (log.created_at.getTime() >= timeOut3s) {
+        return false;
+      }
+      if (log.created_at.getTime() >= timeOut30s && logs.length >= 3) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   async canUserOpenDoor(
     door: DoorPassEntity,
     user: UserPassEntity,
     accessToken: string,
   ) {
-    const userAccessLevel = await this.getUserAccessLevel(user, accessToken);
+    const [userAccessLevel, isUserTimeOutEnded] = await Promise.all([
+      this.getUserAccessLevel(user, accessToken),
+      this.userTimeOut(user),
+    ]);
     const minimum_allways_access_level = door.minimum_allways_access_level;
     if (userAccessLevel.accessLevel === UserAccessLevel.noaccess) {
+      return false;
+    }
+    if (isUserTimeOutEnded === false) {
       return false;
     }
     if (userAccessLevel.accessLevel <= minimum_allways_access_level) {
@@ -228,7 +254,6 @@ export class PassService {
     user: UserPassEntity,
     status: PassActivityLogStatus,
   ) {
-    console.log('saveAccessLog');
     const activityLog = this.passActivityLogRepository.create({
       door_pass: { id: door.id },
       user_pass: { id: user.id },

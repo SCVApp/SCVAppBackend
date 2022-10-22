@@ -40,4 +40,5 @@ export class UserPassEntity {
     (doorPassActivityLog) => doorPassActivityLog.user_pass,
   )
   activity_logs: PassActivityLogEntity[];
+
 }
