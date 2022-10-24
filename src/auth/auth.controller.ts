@@ -77,8 +77,9 @@ export class AuthController {
     } else if (state === 'testnaappscv') {
       return res.redirect('https://testna.app.scv.si/?success=signin');
     }
+    const signToken = await this.tokenService.signToken(token);
     return res.redirect(
-      `scvapp://app.scv.si/mobileapp?accessToken=${token.accessToken}&refreshToken=${token.refreshToken}&expiresOn=${token.expiresOn}`,
+      `scvapp://app.scv.si/mobileapp?accessToken=${signToken.accessToken}&refreshToken=${signToken.refreshToken}&expiresOn=${signToken.expiresOn}`,
     );
   }
 
@@ -87,12 +88,17 @@ export class AuthController {
     @Body() body: TokenDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const token = await this.tokenService.getToken(body);
-    if (!token) {
+    const verifyToken = await this.tokenService.verifyToken(body);
+    if (verifyToken) {
+      const token = await this.tokenService.getToken(verifyToken);
+      if (!token) {
+        throw new UnauthorizedException('Ne morem osveziti zetona');
+      }
+      res.statusCode = 200;
+      const signToken = await this.tokenService.signToken(token);
+      return signToken;
+    } else {
       throw new UnauthorizedException('Ne morem osveziti zetona');
     }
-    res.statusCode = 200;
-
-    return token;
   }
 }

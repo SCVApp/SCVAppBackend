@@ -59,7 +59,7 @@ export class AppModule implements NestModule {
         'user',
         'search',
         'pass/open_door/:code',
-        "'pass/get_door/:code'",
+        'pass/get_door/:code',
       );
     consumer
       .apply(AdminMiddleware)

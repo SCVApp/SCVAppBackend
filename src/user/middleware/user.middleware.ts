@@ -17,7 +17,9 @@ export class UserMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: () => void) {
     //Funkcija za pridebitev osnovnih uporabnikovih podatkov
-    let authorization = req.headers.authorization;
+    const authorization = await this.tokenService.verifyAuthHeader(
+      req.headers.authorization,
+    );
     try {
       const jwtCookie = req.cookies['jwt'] || undefined;
       const tokenCookie = req.cookies['token'] || undefined;

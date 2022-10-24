@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Client, ResponseType } from '@microsoft/microsoft-graph-client';
 import 'isomorphic-fetch'; //Potrebujemo za microsoft client
 import { DateTime } from 'luxon'; //Za urnik
@@ -99,7 +95,7 @@ export class UserService {
     };
   }
 
-  kajJeSedejNaUrniku(urnik) {
+  kajJeSedajNaUrniku(urnik) {
     for (let i = 0; i < urnik.length; i++) {
       let ura = urnik[i];
       let trajanje = ura.trajanje.split('-');
@@ -109,13 +105,13 @@ export class UserService {
       let slovenian = DateTime.local().setZone('Europe/Ljubljana');
       let trenutniCas = new Date();
       trenutniCas.setFullYear(
-        slovenian.c.year,
-        slovenian.c.month - 1,
-        slovenian.c.day,
+        slovenian.year,
+        slovenian.month - 1,
+        slovenian.day,
       );
-      trenutniCas.setHours(slovenian.c.hour);
-      trenutniCas.setMinutes(slovenian.c.minute);
-      trenutniCas.setSeconds(slovenian.c.second);
+      trenutniCas.setHours(slovenian.hour);
+      trenutniCas.setMinutes(slovenian.minute);
+      trenutniCas.setSeconds(slovenian.second);
 
       let zacetniCas = new Date(trenutniCas.getTime());
       zacetniCas.setHours(zacetek[0]);
@@ -422,9 +418,9 @@ export class UserService {
     }
 
     if (urlZaUrnik == '') {
-      console.log('Bad');
       throw new BadRequestException();
     }
+
     let htmlData = await (await axios.get(urlZaUrnik)).data;
     const $ = cheerio.load(htmlData);
     let idForSelecting = 0;
@@ -477,16 +473,12 @@ export class UserService {
 
     const ureDanes = ($, razporedUr) => {
       return razporedUr.map((razporedUre, i) => {
-        let trenutniCas = new Date(DateTime.now().setLocale('sl-SI').ts); // Dobimo trenutni cas
-        let year = trenutniCas.getFullYear();
+        let trenutniCas: DateTime = DateTime.now().setLocale('sl-SI'); // Dobimo trenutni cas
+        let year = trenutniCas.year;
         let month =
-          trenutniCas.getMonth() + 1 < 10
-            ? `0${trenutniCas.getMonth() + 1}`
-            : trenutniCas.getMonth() + 1;
+          trenutniCas.month < 10 ? `0${trenutniCas.month}` : trenutniCas.month;
         let day =
-          trenutniCas.getDate() < 10
-            ? `0${trenutniCas.getDate()}`
-            : trenutniCas.getDate(); // dobimo trenutni dan, za katerega dobimo urnik
+          trenutniCas.day < 10 ? `0${trenutniCas.day}` : trenutniCas.day; // dobimo trenutni dan, za katerega dobimo urnik
         // let day = '23'; //spremeni dan na iskanega urnika format: 08, 07, 10, ...
         let id = razporedUre.id; // Vsako okno ima id za katero uro gre (npr. okno za 1. uro ima id 1)
         let selectorForClass = `#ednevnik-seznam_ur_teden-td-${id}-${year}-${month}-${day}`; // Dobimo ID(v HTML-ju) elementa okna iz katerega dobimo predmet, ucitelja, ali je nadomescanje ...
@@ -515,7 +507,7 @@ export class UserService {
 
     let ureDanesNaUrniku = ureDanes($, razporedUr);
 
-    let trenutnoNaUrniku = this.kajJeSedejNaUrniku(ureDanesNaUrniku);
+    let trenutnoNaUrniku = this.kajJeSedajNaUrniku(ureDanesNaUrniku);
     return {
       urnik: ureDanesNaUrniku,
       trenutnoNaUrniku: trenutnoNaUrniku,

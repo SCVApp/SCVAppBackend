@@ -77,4 +77,58 @@ export class TokenService {
     res.cookie('jwt', jwt, this.getCookieOptions());
     res.cookie('token', jwtRefreshToken, this.getCookieOptions());
   }
+
+  async verifyAuthHeader(authorization: string): Promise<string> {
+    if (!authorization) {
+      return null;
+    }
+    if (authorization === '') {
+      return null;
+    }
+    try {
+      let data = await this.jwtService.verifyAsync(authorization);
+      return data.accessToken;
+    } catch (e) {
+      return null;
+    }
+  }
+  async signToken(token: Token): Promise<Token> {
+    const signAccessToken = await this.jwtService.signAsync(
+      {
+        accessToken: token.accessToken,
+      },
+      {
+        expiresIn: '10d',
+      },
+    );
+    const signRefreshToken = await this.jwtService.signAsync(
+      {
+        refreshToken: token.refreshToken,
+      },
+      {
+        expiresIn: '30d',
+      },
+    );
+    return {
+      accessToken: signAccessToken,
+      refreshToken: signRefreshToken,
+      expiresOn: token.expiresOn,
+    };
+  }
+
+  async verifyToken(token: Token): Promise<Token> {
+    try {
+      const accessToken = await this.jwtService.verifyAsync(token.accessToken);
+      const refreshToken = await this.jwtService.verifyAsync(
+        token.refreshToken,
+      );
+      return {
+        accessToken: accessToken.accessToken,
+        refreshToken: refreshToken.refreshToken,
+        expiresOn: token.expiresOn,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
 }
