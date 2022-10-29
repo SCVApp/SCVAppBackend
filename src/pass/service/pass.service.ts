@@ -211,7 +211,7 @@ export class PassService {
       return false;
     }
     if (isUserTimeOutEnded === false) {
-      return false;
+      throw new UnauthorizedException('User is in timeout');
     }
     if (userAccessLevel.accessLevel <= minimum_allways_access_level) {
       return true;
@@ -275,17 +275,25 @@ export class PassService {
     if (!user) {
       throw new UnauthorizedException("User doesn't exist");
     }
-    const canUserOpenDoor = await this.canUserOpenDoor(door, user, accessToken);
-    if (canUserOpenDoor) {
-      this.passGateway.openDoor(door.code);
-      if (!this.openDoor.includes(door.code)) {
-        this.openDoor.push(door.code);
+    try {
+      const canUserOpenDoor = await this.canUserOpenDoor(
+        door,
+        user,
+        accessToken,
+      );
+      if (canUserOpenDoor) {
+        this.passGateway.openDoor(door.code);
+        if (!this.openDoor.includes(door.code)) {
+          this.openDoor.push(door.code);
+        }
+        this.saveAccessLog(door, user, PassActivityLogStatus.success);
+        return { status: 'success' };
       }
-      this.saveAccessLog(door, user, PassActivityLogStatus.success);
-      return { status: 'success' };
+      this.saveAccessLog(door, user, PassActivityLogStatus.fail);
+      throw new UnauthorizedException("User doesn't have access to this door");
+    } catch (e) {
+      throw e;
     }
-    this.saveAccessLog(door, user, PassActivityLogStatus.fail);
-    throw new UnauthorizedException("User doesn't have access to this door");
   }
 
   async DoorIsOpen(code: string) {
