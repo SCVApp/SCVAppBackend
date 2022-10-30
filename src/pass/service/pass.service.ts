@@ -186,7 +186,7 @@ export class PassService {
         status: PassActivityLogStatus.success,
       },
     });
-    if (logs.length > 3) {
+    if (logs.length >= 3) {
       return false;
     }
     for (const log of logs) {
