@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 import { env } from 'process';
 import { Token } from './token.class';
@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class TokenService {
+  private readonly logger = new Logger(TokenService.name);
   constructor(private readonly jwtService: JwtService) {}
 
   getCookieOptions(): CookieOptions {
@@ -22,13 +23,13 @@ export class TokenService {
 
   async getToken(token: Token): Promise<Token> {
     let now = new Date();
-    let expDateUTC = new Date(token.expiresOn);
+    let expDateUTC = new Date(token.expiresOn) || new Date();
 
-    if (now.getTime() < expDateUTC.getTime() - 3600000) {
-      console.log('not expired');
+    if (now.getTime() < expDateUTC.getTime()) {
+      this.logger.log('Token is still valid');
       return token;
     }
-    console.log('expired');
+    this.logger.log('Token is not valid, refreshing...');
 
     const data = await this.fetchToken(token);
     if (!data) {
@@ -45,25 +46,29 @@ export class TokenService {
   }
 
   private async fetchToken(token: Token) {
-    let respons = await fetch(`${env.OAUTH_AUTHORITY}oauth2/v2.0/token`, {
-      body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
-        env.OAUTH_APP_CLIENT_SECRET
-      }&refresh_token=${token.refreshToken}&scopes='${env.OAUTH_SCOPES.split(
-        ' ',
-      )}'&grant_type=refresh_token&redirect_uri=${env.OAUTH_REDIRECT_URI}`,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      method: 'post',
-    });
-    if (respons.status != 200) {
+    try {
+      let respons = await fetch(`${env.OAUTH_AUTHORITY}oauth2/v2.0/token`, {
+        body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
+          env.OAUTH_APP_CLIENT_SECRET
+        }&refresh_token=${token.refreshToken}&scopes='${env.OAUTH_SCOPES.split(
+          ' ',
+        )}'&grant_type=refresh_token&redirect_uri=${env.OAUTH_REDIRECT_URI}`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        method: 'post',
+      });
+      if (respons.status != 200) {
+        return undefined;
+      }
+      const data = await respons.json();
+      if (data) {
+        return data;
+      }
+      return undefined;
+    } catch (e) {
       return undefined;
     }
-    const data = await respons.json();
-    if (data) {
-      return data;
-    }
-    return undefined;
   }
 
   async saveToken(token: Token, res: Response) {
@@ -71,9 +76,14 @@ export class TokenService {
       accessToken: token.accessToken,
       expiresOn: token.expiresOn,
     });
-    const jwtRefreshToken = await this.jwtService.signAsync({
-      refreshToken: token.refreshToken,
-    });
+    const jwtRefreshToken = await this.jwtService.signAsync(
+      {
+        refreshToken: token.refreshToken,
+      },
+      {
+        expiresIn: '5d',
+      },
+    );
     res.cookie('jwt', jwt, this.getCookieOptions());
     res.cookie('token', jwtRefreshToken, this.getCookieOptions());
   }
@@ -130,5 +140,36 @@ export class TokenService {
     } catch (e) {
       return null;
     }
+  }
+
+  async verifyTokenFromCookie(jwt: string, token: string): Promise<Token> {
+    if (!token) {
+      return null;
+    }
+    let refreshToken = null;
+    try {
+      const verifyToken = await this.jwtService.verifyAsync(token);
+      if (verifyToken) {
+        refreshToken = verifyToken.refreshToken;
+      }
+    } catch (e) {
+      return null;
+    }
+    let accessToken = null;
+    let expiresIn = null;
+    if (jwt) {
+      try {
+        const verifyJwt = await this.jwtService.verifyAsync(jwt);
+        if (verifyJwt) {
+          accessToken = verifyJwt.accessToken;
+          expiresIn = verifyJwt.expiresOn;
+        }
+      } catch (e) {}
+    }
+    return {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresOn: expiresIn,
+    };
   }
 }

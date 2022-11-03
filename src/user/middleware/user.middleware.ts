@@ -3,82 +3,50 @@ import {
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { Token } from '../../token/token.class';
 import { TokenService } from '../../token/token.service';
 
 @Injectable()
 export class UserMiddleware implements NestMiddleware {
-  constructor(
-    private readonly tokenService: TokenService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly tokenService: TokenService) {}
 
-  async use(req: Request, res: Response, next: () => void) {
+  async use(req: Request, res: Response, next: NextFunction) {
     //Funkcija za pridebitev osnovnih uporabnikovih podatkov
     const authorization = await this.tokenService.verifyAuthHeader(
       req.headers.authorization,
     );
+    if (authorization) {
+      req.body.accessToken = authorization;
+      return next();
+    }
     try {
-      const jwtCookie = req.cookies['jwt'] || undefined;
-      const tokenCookie = req.cookies['token'] || undefined;
-      const jwt = await this.jwtService.verifyAsync(jwtCookie);
-      const tokenVerify = await this.jwtService.verifyAsync(tokenCookie);
-
-      let data: Token = {
-        accessToken: jwt.accessToken,
-        expiresOn: jwt.expiresOn,
-        refreshToken: tokenVerify.refreshToken,
-      };
+      const cookieToken:string = req.cookies['token'] || null;
+      const cookieJwt:string = req.cookies['jwt'] || null;
+      const token: Token = await this.tokenService.verifyTokenFromCookie(
+        cookieJwt,
+        cookieToken,
+      );
+      if (!token || !token?.refreshToken) {
+        throw new UnauthorizedException('Nimate pravic dostopati do sem');
+      }
+      const newToken = await this.tokenService.getToken(token);
       if (
-        (!data.accessToken || !data.refreshToken || !data.expiresOn) &&
-        !authorization
+        !newToken ||
+        !newToken?.accessToken ||
+        !newToken?.refreshToken ||
+        !newToken?.expiresOn
       ) {
         throw new UnauthorizedException('Nimate pravic dostopati do sem');
       }
-      if (
-        (data.accessToken === '' ||
-          data.refreshToken === '' ||
-          data.expiresOn === '') &&
-        !authorization
-      ) {
-        throw new UnauthorizedException('Nimate pravic dostopati do sem');
+      if (newToken) {
+        req.body.accessToken = newToken.accessToken || undefined;
+        req.body.token = newToken || undefined;
+        await this.tokenService.saveToken(newToken, res);
+        return next();
       }
-      let oldToken: Token = {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        expiresOn: data.expiresOn,
-      };
-      let token: Token;
-      if (!authorization) {
-        token = await this.tokenService.getToken(oldToken);
-        if (!token) {
-          throw new UnauthorizedException('Nimate pravic dostopati do sem');
-        }
-      }
-      let accessToken = '';
-      if (!authorization) {
-        accessToken = token.accessToken || '';
-      } else {
-        accessToken = authorization;
-      }
-
-      req.body.accessToken = accessToken || undefined;
-      req.body.token = token || undefined;
-
-      if (token) {
-        await this.tokenService.saveToken(token, res);
-      }
-      next();
-      return;
     } catch (e) {
-      if (!authorization) {
-        throw new UnauthorizedException('Nimate pravic dostopati do sem');
-      } else {
-        req.body.accessToken = authorization;
-        next();
-      }
+      throw e;
     }
   }
 }
