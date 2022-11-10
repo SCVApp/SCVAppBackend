@@ -176,7 +176,6 @@ export class PassService {
   }
 
   async userTimeOut(user: UserPassEntity) {
-    //check for logs that are created in last 30 seconds
     const dateNow = new Date();
     const date30SecondsAgo = new Date(dateNow.getTime() - 1000 * 30);
     const logs = await this.passActivityLogRepository.find({

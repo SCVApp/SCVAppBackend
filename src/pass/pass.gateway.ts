@@ -1,4 +1,4 @@
-import { Inject, forwardRef } from '@nestjs/common';
+import { Inject, forwardRef, Logger } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -11,6 +11,7 @@ import { PassService } from './service/pass.service';
 
 @WebSocketGateway()
 export class PassGateway {
+  private readonly logger = new Logger(PassGateway.name);
   constructor(
     @Inject(forwardRef(() => PassService))
     private readonly passService: PassService,
@@ -18,6 +19,27 @@ export class PassGateway {
 
   @WebSocketServer()
   server: Server;
+
+  //create function when new connection is made
+
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    const doorCode: string =
+      client.handshake.headers['code'].toString() || null;
+    const doorAccessSecret: string =
+      client.handshake.headers['secret'].toString() || null;
+
+    if (!doorCode || !doorAccessSecret) return client.disconnect();
+    const doorPass = await this.passService.getDoorWithCode(doorCode);
+    if (!doorPass || doorPass.code !== doorCode) return client.disconnect();
+
+    const doesAccessSecretMatch = await this.passService.compareHash(
+      doorPass.access_secret,
+      doorAccessSecret,
+    );
+    if (!doesAccessSecretMatch) return client.disconnect();
+
+    client.join(doorCode);
+  }
 
   @SubscribeMessage('pass_identify')
   async handlePassIdentify(
