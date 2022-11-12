@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Headers,
+  Logger,
   Post,
   Query,
   Redirect,
@@ -18,6 +19,7 @@ import { TokenService } from 'src/token/token.service';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(
     private readonly authServices: AuthService,
     private readonly jwtService: JwtService,
@@ -79,7 +81,11 @@ export class AuthController {
     }
     const signToken = await this.tokenService.signToken(token);
     return res.redirect(
-      `scvapp://app.scv.si/mobileapp?accessToken=${signToken.accessToken}&refreshToken=${signToken.refreshToken}&expiresOn=${signToken.expiresOn}`,
+      `scvapp://app.scv.si/mobileapp?accessToken=${
+        signToken.accessToken
+      }&refreshToken=${signToken.refreshToken}&expiresOn=${encodeURIComponent(
+        signToken.expiresOn,
+      )}`,
     );
   }
 

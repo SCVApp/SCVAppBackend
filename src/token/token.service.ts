@@ -24,7 +24,6 @@ export class TokenService {
   async getToken(token: Token): Promise<Token> {
     let now = new Date();
     let expDateUTC = new Date(token.expiresOn) || new Date();
-
     if (now.getTime() < expDateUTC.getTime()) {
       this.logger.log('Token is still valid');
       return token;

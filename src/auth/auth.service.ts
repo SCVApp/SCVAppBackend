@@ -1,11 +1,11 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
 import { env } from 'process';
 import clientApplication from 'src/application/clientApplication';
 import { Token } from 'src/token/token.class';
-import { TokenDto } from '../token/token.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   async getAuthUrl(state: string) {
     //Funkcija za generiranje URL-ja za preusmeritev na prijavno stran
     const authCodeUrlParameters = {
@@ -37,6 +37,7 @@ export class AuthService {
           refreshToken = item[1].secret;
         }
       });
+
       const token: Token = {
         //Žeton, ki ga shranimo v uporabnikovo sejo ali v primeru mobilne aplikacije v pomnilnik in vsebuje:
         accessToken: respons.accessToken, //Dostopni žeton
