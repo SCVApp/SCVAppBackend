@@ -58,8 +58,11 @@ export class AppModule implements NestModule {
       .forRoutes(
         'user',
         'search',
-        'pass/open_door/:code',
-        'pass/get_door/:code',
+        { path: 'pass/open_door/:code', method: RequestMethod.GET },
+        {
+          path: 'pass/get_door/:code',
+          method: RequestMethod.GET,
+        },
       );
     consumer
       .apply(AdminMiddleware)

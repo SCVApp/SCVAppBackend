@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -12,6 +13,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateDoorPassDto } from './dto/createDoorPass.dto';
+import { RenameDoorPassDto } from './dto/renameDoorPass.dto';
 import { PassService } from './service/pass.service';
 
 @Controller('pass')
@@ -54,6 +56,12 @@ export class PassController {
     return door.name_id;
   }
 
+  @Delete('delete_door/:code')
+  @HttpCode(200)
+  async deleteDoor(@Param('code', ValidationPipe) code: string) {
+    return await this.passService.deleteDoorWithCode(code);
+  }
+
   @Get('door/is_opened')
   @HttpCode(200)
   async isDoorOpened(@Body() body: any) {
@@ -61,5 +69,23 @@ export class PassController {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
     return this.passService.DoorIsOpen(body.door.code);
+  }
+
+  @Get('door/regenerate_code/:code')
+  @HttpCode(200)
+  async regenerateCode(@Param('code', ValidationPipe) code: string) {
+    return await this.passService.regenerateDoorCode(code);
+  }
+
+  @Get('door/regenerate_secret/:code')
+  @HttpCode(200)
+  async regenerateSecret(@Param('code', ValidationPipe) code: string) {
+    return await this.passService.regenerateDoorAccessSecret(code);
+  }
+
+  @Post('door/rename')
+  @HttpCode(200)
+  async renameDoor(@Body() body: RenameDoorPassDto) {
+    return await this.passService.renameDoor(body.code, body.name_id);
   }
 }

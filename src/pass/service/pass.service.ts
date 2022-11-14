@@ -19,6 +19,7 @@ import { CreateDoorPassDto } from '../dto/createDoorPass.dto';
 import { PassGateway } from '../pass.gateway';
 import { PassActivityLogEntity } from '../entities/passActivityLog.entity';
 import { PassActivityLogStatus } from '../enums/passActivityLogStatus.enum';
+import { RenameDoorPassDto } from '../dto/renameDoorPass.dto';
 
 @Injectable()
 export class PassService {
@@ -309,8 +310,8 @@ export class PassService {
   }
 
   async createDoorPass(data: CreateDoorPassDto, accessToken: string) {
-    const doorPassCode = crypto.randomBytes(64).toString('hex');
-    const accessSecret = crypto.randomBytes(256).toString('hex');
+    const doorPassCode = this.genereateDoorPassCode();
+    const accessSecret = this.generateDoorPassAccessSecret();
     const [hashAccessSecret, users, existingDoor] = await Promise.all([
       bcrypt.hash(accessSecret, 10),
       this.getUsersFromAzureId(data.allways_pass_users_azure_ids, accessToken),
@@ -361,5 +362,60 @@ export class PassService {
     return await this.doorPassRepository.findOne({
       where: { name_id: name_id },
     });
+  }
+
+  async deleteDoorWithCode(code: string) {
+    const door = await this.getDoorWithCode(code);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    await this.doorPassRepository.delete(door);
+    return { status: 'success' };
+  }
+
+  async regenerateDoorCode(code: string) {
+    const door = await this.getDoorWithCode(code);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    const newCode = this.genereateDoorPassCode();
+    await this.doorPassRepository.update({ id: door.id }, { code: newCode });
+    return { status: 'success' };
+  }
+
+  async regenerateDoorAccessSecret(code: string) {
+    const door = await this.getDoorWithCode(code);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    const newAccessSecret = this.generateDoorPassAccessSecret();
+    const hashAccessSecret = await bcrypt.hash(newAccessSecret, 10);
+    await this.doorPassRepository.update(
+      { id: door.id },
+      { access_secret: hashAccessSecret },
+    );
+    return { status: 'success', access_secret: newAccessSecret };
+  }
+
+  async renameDoor(code: string, name_id: string) {
+    const [door, existingDoor] = await Promise.all([
+      this.getDoorWithCode(code),
+      this.getDoorWithNameId(name_id),
+    ]);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    if (existingDoor) {
+      throw new BadRequestException('Door with this name_id already exists');
+    }
+    await this.doorPassRepository.update({ id: door.id }, { name_id: name_id });
+    return { status: 'success' };
+  }
+  genereateDoorPassCode() {
+    return crypto.randomBytes(64).toString('hex');
+  }
+
+  generateDoorPassAccessSecret() {
+    return crypto.randomBytes(256).toString('hex');
   }
 }
