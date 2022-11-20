@@ -54,6 +54,7 @@ export class AppModule implements NestModule {
       .exclude(
         { path: 'user/logoutUrl', method: RequestMethod.GET },
         { path: 'user/logout', method: RequestMethod.GET },
+        { path: 'user/schedule', method: RequestMethod.POST },
       )
       .forRoutes(
         'user',
@@ -73,6 +74,9 @@ export class AppModule implements NestModule {
       )
       .forRoutes('admin', 'pass');
 
-    consumer.apply(DoorPassMiddleware).forRoutes('pass/door/is_opened');
+    consumer.apply(DoorPassMiddleware).forRoutes('pass/door/is_opened', {
+      path: 'user/schedule',
+      method: RequestMethod.POST,
+    });
   }
 }

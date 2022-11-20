@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import { PassService } from '../service/pass.service';
 
 @Injectable()
 export class DoorPassMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(DoorPassMiddleware.name);
   constructor(private readonly passService: PassService) {}
   async use(req: Request, res: Response, next: () => void) {
     try {

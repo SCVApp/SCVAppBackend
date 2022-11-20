@@ -401,15 +401,10 @@ export class UserService {
     return statusData;
   }
 
-  async getUserschedule(
-    client,
-    classId: string = null,
-    schoolId: string = null,
-    urnikUrl: string = null,
-  ) {
-    let selectedSchool = { razred: classId, id: schoolId, urnikUrl: urnikUrl };
+  async getUserSchedule(client: Client, urnikUrl: string = null) {
+    let selectedSchool = { urnikUrl: urnikUrl };
     let urlZaUrnik = urnikUrl;
-    if (!classId && !schoolId && !urnikUrl) {
+    if (!urnikUrl) {
       if (!client) {
         throw new BadRequestException();
       }

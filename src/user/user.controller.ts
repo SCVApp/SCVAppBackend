@@ -8,6 +8,9 @@ import {
   Headers,
   Param,
   Redirect,
+  Post,
+  NotFoundException,
+  HttpCode,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -15,6 +18,7 @@ import { UserService } from './user.service';
 import { ResponseType } from '@microsoft/microsoft-graph-client';
 import { env } from 'process';
 import { TokenService } from 'src/token/token.service';
+import { GetClassScheduleDto } from './dtos/getClassSchedule.dto';
 
 @Controller('user')
 export class UserController {
@@ -155,7 +159,7 @@ export class UserController {
   }
 
   @Get('/schedule/')
-  async getUserschedule(
+  async getUserSchedule(
     @Body() body,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -165,8 +169,21 @@ export class UserController {
     }
 
     const client = this.userService.getClient(accessToken);
-    const data = await this.userService.getUserschedule(client);
+    const data = await this.userService.getUserSchedule(client);
     res.statusCode = 200;
+    return data;
+  }
+
+  @Post('/schedule/')
+  @HttpCode(200)
+  async getClassSchedule(@Body() body: GetClassScheduleDto) {
+    const [classUrl, _] = await this.userService.getUserUrlForUrnikFromClass(
+      body.classId,
+    );
+    if (!classUrl) {
+      throw new NotFoundException('Ta razred ne obstaja');
+    }
+    const data = await this.userService.getUserSchedule(null, classUrl);
     return data;
   }
 }

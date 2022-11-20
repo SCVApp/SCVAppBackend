@@ -1,0 +1,24 @@
+#create docker compose file for the application nestjs and postgresql
+version: 'version 3'
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: app
+    restart: always
+    ports:
+      - 5050:5050
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER: postgres
+      - POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+#docker-compose up

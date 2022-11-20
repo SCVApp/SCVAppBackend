@@ -231,12 +231,7 @@ export class PassService {
       if (!urnikUrl || !schoolId) {
         return false;
       }
-      const urnik = await this.userService.getUserschedule(
-        null,
-        razred,
-        schoolId,
-        urnikUrl,
-      );
+      const urnik = await this.userService.getUserSchedule(null, urnikUrl);
       const trenutnoNaUrniku = urnik.trenutnoNaUrniku;
       const trenutneUre = trenutnoNaUrniku.ura;
       const doorNameId = door.name_id;
