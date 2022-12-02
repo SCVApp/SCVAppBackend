@@ -60,7 +60,19 @@ export class PassGateway {
     client.disconnect();
   }
 
-  openDoor(doorCode: string) {
-    this.server.to(doorCode).emit('open_door', doorCode);
+  async openDoor(doorCode: string) {
+    const response = await new Promise((resolve, reject) => {
+      this.server
+        .to(doorCode)
+        .timeout(5000)
+        .emit('open_door', doorCode, (err: any, response: any) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        });
+    });
+    return response[0] === 'ok';
   }
 }
