@@ -64,7 +64,7 @@ export class PassGateway {
     const response = await new Promise((resolve, reject) => {
       this.server
         .to(doorCode)
-        .timeout(5000)
+        .timeout(1000)
         .emit('open_door', doorCode, (err: any, response: any) => {
           if (err) {
             reject(err);
