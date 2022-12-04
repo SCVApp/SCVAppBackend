@@ -281,7 +281,6 @@ export class PassService {
           this.openDoor.push(door.code);
         }
         if (!(await this.passGateway.openDoor(door.code))) {
-          this.openDoor.splice(this.openDoor.indexOf(door.code), 1);
           throw new BadRequestException('Door not opened');
         }
         this.saveAccessLog(door, user, PassActivityLogStatus.success);

@@ -61,18 +61,22 @@ export class PassGateway {
   }
 
   async openDoor(doorCode: string) {
-    const response = await new Promise((resolve, reject) => {
-      this.server
-        .to(doorCode)
-        .timeout(1000)
-        .emit('open_door', doorCode, (err: any, response: any) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-    });
-    return response[0] === 'ok';
+    try {
+      const response = await new Promise((resolve, reject) => {
+        this.server
+          .to(doorCode)
+          .timeout(1000)
+          .emit('open_door', doorCode, (err: any, response: any) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          });
+      });
+      return response[0] === 'ok';
+    } catch (e) {
+      return false;
+    }
   }
 }
