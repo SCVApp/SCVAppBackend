@@ -277,9 +277,11 @@ export class PassService {
         accessToken,
       );
       if (canUserOpenDoor) {
-        this.passGateway.openDoor(door.code);
         if (!this.openDoor.includes(door.code)) {
           this.openDoor.push(door.code);
+        }
+        if (!(await this.passGateway.openDoor(door.code))) {
+          throw new BadRequestException('Door not opened');
         }
         this.saveAccessLog(door, user, PassActivityLogStatus.success);
         return { status: 'success' };
