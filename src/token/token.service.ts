@@ -107,7 +107,7 @@ export class TokenService {
         accessToken: token.accessToken,
       },
       {
-        expiresIn: '10d',
+        expiresIn: '30d',
       },
     );
     const signRefreshToken = await this.jwtService.signAsync(
