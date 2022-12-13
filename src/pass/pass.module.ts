@@ -14,10 +14,12 @@ import { UserModule } from 'src/user/user.module';
 import { AdminModule } from 'src/admin/admin.module';
 import { PassGateway } from './pass.gateway';
 import { PassActivityLogEntity } from './entities/passActivityLog.entity';
+import { PassControlerEntity } from './entities/passControler.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      PassControlerEntity,
       DoorPassEntity,
       UserPassEntity,
       PassActivityLogEntity,

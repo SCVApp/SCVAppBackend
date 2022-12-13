@@ -7,6 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
+import { DoorPassEntity } from './entities/doorPass.entity';
 import { PassService } from './service/pass.service';
 
 @WebSocketGateway()
@@ -20,8 +21,6 @@ export class PassGateway {
   @WebSocketServer()
   server: Server;
 
-  //create function when new connection is made
-
   async handleConnection(@ConnectedSocket() client: Socket) {
     const doorCode: string =
       client.handshake.headers['code'].toString() || null;
@@ -31,14 +30,19 @@ export class PassGateway {
     if (!doorCode || !doorAccessSecret) return client.disconnect();
     const doorPass = await this.passService.getDoorWithCode(doorCode);
     if (!doorPass || doorPass.code !== doorCode) return client.disconnect();
-
     const doesAccessSecretMatch = await this.passService.compareHash(
       doorPass.access_secret,
       doorAccessSecret,
     );
     if (!doesAccessSecretMatch) return client.disconnect();
 
-    client.join(doorCode);
+    let controlerCode = doorPass.controler?.code || null;
+
+    if (controlerCode) {
+      client.join(controlerCode);
+    } else {
+      client.join(doorCode);
+    }
   }
 
   @SubscribeMessage('pass_identify')
@@ -60,13 +64,17 @@ export class PassGateway {
     client.disconnect();
   }
 
-  async openDoor(doorCode: string) {
+  async openDoor(passDoor: DoorPassEntity) {
+    let code = passDoor.code;
+    if (passDoor.controler) {
+      code = passDoor.controler.code;
+    }
     try {
       const response = await new Promise((resolve, reject) => {
         this.server
-          .to(doorCode)
+          .to(code)
           .timeout(1000)
-          .emit('open_door', doorCode, (err: any, response: any) => {
+          .emit('open_door', passDoor.code, (err: any, response: any) => {
             if (err) {
               reject(err);
             } else {

@@ -5,9 +5,12 @@ import {
   Column,
   ManyToMany,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
 import { PassActivityLogEntity } from './passActivityLog.entity';
+import { PassControlerEntity } from './passControler.entity';
 import { UserPassEntity } from './passUser.entity';
 
 @Entity('door_passes')
@@ -45,4 +48,8 @@ export class DoorPassEntity {
     (doorPassActivityLog) => doorPassActivityLog.door_pass,
   )
   activity_logs: PassActivityLogEntity[];
+
+  @ManyToOne((type) => PassControlerEntity, { nullable: true, eager: true })
+  @JoinColumn({ name: 'controler_id' })
+  controler!: PassControlerEntity;
 }
