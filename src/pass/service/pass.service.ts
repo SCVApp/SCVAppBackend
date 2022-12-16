@@ -19,7 +19,7 @@ import { CreateDoorPassDto } from '../dto/createDoorPass.dto';
 import { PassGateway } from '../pass.gateway';
 import { PassActivityLogEntity } from '../entities/passActivityLog.entity';
 import { PassActivityLogStatus } from '../enums/passActivityLogStatus.enum';
-import { RenameDoorPassDto } from '../dto/renameDoorPass.dto';
+import { PassTimeProfileEntity } from '../entities/passTimeProfile';
 
 @Injectable()
 export class PassService {
@@ -30,6 +30,8 @@ export class PassService {
     private readonly userPassRepository: Repository<UserPassEntity>,
     @InjectRepository(PassActivityLogEntity)
     private readonly passActivityLogRepository: Repository<PassActivityLogEntity>,
+    @InjectRepository(PassTimeProfileEntity)
+    private readonly passTimeProfileRepository: Repository<PassTimeProfileEntity>,
     private readonly searchService: SearchService,
     private readonly adminService: AdminService,
     private readonly userService: UserService,
@@ -202,10 +204,15 @@ export class PassService {
     user: UserPassEntity,
     accessToken: string,
   ) {
-    const [userAccessLevel, isUserTimeOutEnded] = await Promise.all([
-      this.getUserAccessLevel(user, accessToken),
-      this.userTimeOut(user),
-    ]);
+    const [userAccessLevel, isUserTimeOutEnded, ifUserHasAccessInTimeProfile] =
+      await Promise.all([
+        this.getUserAccessLevel(user, accessToken),
+        this.userTimeOut(user),
+        this.chechUserTimeProfile(user, door),
+      ]);
+    if (ifUserHasAccessInTimeProfile === true) {
+      return true;
+    }
     const minimum_allways_access_level = door.minimum_allways_access_level;
     if (userAccessLevel.accessLevel === UserAccessLevel.noaccess) {
       return false;
@@ -257,6 +264,93 @@ export class PassService {
       status: status,
     });
     await this.passActivityLogRepository.save(activityLog);
+  }
+
+  async chechUserTimeProfile(
+    user: UserPassEntity,
+    door: DoorPassEntity,
+  ): Promise<boolean> {
+    const timeProfile = await this.passTimeProfileRepository.findOne({
+      where: {
+        user_passes: { id: user.id },
+        door_passes: { id: door.id },
+      },
+    });
+    if (!timeProfile) {
+      return false;
+    }
+    if (timeProfile.active === false) {
+      return false;
+    }
+    const dateNow = new Date();
+    const dateStart = new Date(
+      dateNow.getFullYear(),
+      dateNow.getMonth(),
+      dateNow.getDate(),
+      timeProfile.start_time.getHours(),
+      timeProfile.start_time.getMinutes(),
+      timeProfile.start_time.getSeconds(),
+    );
+
+    const dateEnd = new Date(
+      dateNow.getFullYear(),
+      dateNow.getMonth(),
+      dateNow.getDate(),
+      timeProfile.end_time.getHours(),
+      timeProfile.end_time.getMinutes(),
+      timeProfile.end_time.getSeconds(),
+    );
+
+    //Check for start and end time
+    if (dateNow.getTime() < dateStart.getTime()) {
+      return false;
+    }
+
+    if (dateNow.getTime() > dateEnd.getTime()) {
+      return false;
+    }
+
+    //Chech for day of week
+    const dayOfWeek = dateNow.getDay();
+    switch (dayOfWeek) {
+      case 0:
+        if (timeProfile.sunday === false) {
+          return false;
+        }
+        break;
+      case 1:
+        if (timeProfile.monday === false) {
+          return false;
+        }
+        break;
+      case 2:
+        if (timeProfile.tuesday === false) {
+          return false;
+        }
+        break;
+      case 3:
+        if (timeProfile.wednesday === false) {
+          return false;
+        }
+        break;
+      case 4:
+        if (timeProfile.thursday === false) {
+          return false;
+        }
+        break;
+      case 5:
+        if (timeProfile.friday === false) {
+          return false;
+        }
+        break;
+      case 6:
+        if (timeProfile.saturday === false) {
+          return false;
+        }
+        break;
+    }
+
+    return true;
   }
 
   async openDoorWithCode(code: string, accessToken: string) {

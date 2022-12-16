@@ -3,12 +3,11 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToMany,
-  JoinTable,
   OneToMany,
 } from 'typeorm';
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
-import { DoorPassEntity } from './doorPass.entity';
 import { PassActivityLogEntity } from './passActivityLog.entity';
+import { PassTimeProfileEntity } from './passTimeProfile';
 
 @Entity('user_passes')
 export class UserPassEntity {
@@ -24,14 +23,6 @@ export class UserPassEntity {
   @Column({ nullable: true })
   razred: string;
 
-  @ManyToMany(
-    (type) => DoorPassEntity,
-    (doorPass) => doorPass.allways_pass_users,
-    { eager: true },
-  )
-  @JoinTable()
-  allways_door_passes: DoorPassEntity[];
-
   @Column({ nullable: true })
   access_level_updated_at: Date;
 
@@ -41,4 +32,9 @@ export class UserPassEntity {
   )
   activity_logs: PassActivityLogEntity[];
 
+  @ManyToMany(
+    (type) => PassTimeProfileEntity,
+    (timeProfile) => timeProfile.user_passes,
+  )
+  time_profiles: PassTimeProfileEntity[];
 }

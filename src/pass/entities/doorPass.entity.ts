@@ -11,7 +11,7 @@ import {
 import { UserAccessLevel } from '../enums/userAccessLevel.enum';
 import { PassActivityLogEntity } from './passActivityLog.entity';
 import { PassControlerEntity } from './passControler.entity';
-import { UserPassEntity } from './passUser.entity';
+import { PassTimeProfileEntity } from './passTimeProfile';
 
 @Entity('door_passes')
 export class DoorPassEntity {
@@ -36,13 +36,6 @@ export class DoorPassEntity {
   @Column({ comment: 'What is the secret to access this door.' })
   access_secret: string;
 
-  @ManyToMany(
-    (type) => UserPassEntity,
-    (userPass) => userPass.allways_door_passes,
-    { cascade: ['insert'] },
-  )
-  allways_pass_users: UserPassEntity[];
-
   @OneToMany(
     (type) => PassActivityLogEntity,
     (doorPassActivityLog) => doorPassActivityLog.door_pass,
@@ -52,4 +45,10 @@ export class DoorPassEntity {
   @ManyToOne((type) => PassControlerEntity, { nullable: true, eager: true })
   @JoinColumn({ name: 'controler_id' })
   controler!: PassControlerEntity;
+
+  @ManyToMany(
+    (type) => PassTimeProfileEntity,
+    (timeProfile) => timeProfile.door_passes,
+  )
+  time_profiles: PassTimeProfileEntity[];
 }
