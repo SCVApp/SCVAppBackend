@@ -4,6 +4,8 @@ import {
   Injectable,
   UnauthorizedException,
   forwardRef,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
@@ -23,6 +25,7 @@ import { PassTimeProfileEntity } from '../entities/passTimeProfile';
 
 @Injectable()
 export class PassService {
+  private readonly logger = new Logger(PassService.name);
   constructor(
     @InjectRepository(DoorPassEntity)
     private readonly doorPassRepository: Repository<DoorPassEntity>,
@@ -456,12 +459,18 @@ export class PassService {
   }
 
   async deleteDoorWithCode(code: string) {
-    const door = await this.getDoorWithCode(code);
+    const door = await this.doorPassRepository.findOne({ where: { code } });
     if (!door) {
       throw new BadRequestException('Door not found');
     }
-    await this.doorPassRepository.delete(door);
-    return { status: 'success' };
+    try {
+      await this.passActivityLogRepository.delete({
+        door_pass: { id: door.id },
+      });
+      return await this.doorPassRepository.delete({ id: door.id });
+    } catch (e) {
+      throw new InternalServerErrorException("Door can't be deleted");
+    }
   }
 
   async regenerateDoorCode(code: string) {
