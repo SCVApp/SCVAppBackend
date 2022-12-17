@@ -22,6 +22,7 @@ import { PassGateway } from '../pass.gateway';
 import { PassActivityLogEntity } from '../entities/passActivityLog.entity';
 import { PassActivityLogStatus } from '../enums/passActivityLogStatus.enum';
 import { PassTimeProfileEntity } from '../entities/passTimeProfile';
+import { PassControlerEntity } from '../entities/passControler.entity';
 
 @Injectable()
 export class PassService {
@@ -35,6 +36,8 @@ export class PassService {
     private readonly passActivityLogRepository: Repository<PassActivityLogEntity>,
     @InjectRepository(PassTimeProfileEntity)
     private readonly passTimeProfileRepository: Repository<PassTimeProfileEntity>,
+    @InjectRepository(PassControlerEntity)
+    private readonly passControlerRepository: Repository<PassControlerEntity>,
     private readonly searchService: SearchService,
     private readonly adminService: AdminService,
     private readonly userService: UserService,
@@ -517,5 +520,9 @@ export class PassService {
 
   generateDoorPassAccessSecret() {
     return crypto.randomBytes(256).toString('hex');
+  }
+
+  async getControllers() {
+    return await this.passControlerRepository.find();
   }
 }

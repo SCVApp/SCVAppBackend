@@ -88,4 +88,9 @@ export class PassController {
   async renameDoor(@Body() body: RenameDoorPassDto) {
     return await this.passService.renameDoor(body.code, body.name_id);
   }
+
+  @Get('controller/get_all')
+  async getControllers() {
+    return await this.passService.getControllers();
+  }
 }
