@@ -12,7 +12,9 @@ import {
   UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
+import { CreateControllerDto } from './dto/createController.dto';
 import { CreateDoorPassDto } from './dto/createDoorPass.dto';
+import { CreateTimeProfileDto } from './dto/createTimeProfile.dto';
 import { RenameDoorPassDto } from './dto/renameDoorPass.dto';
 import { PassService } from './service/pass.service';
 
@@ -90,7 +92,24 @@ export class PassController {
   }
 
   @Get('controller/get_all')
+  @HttpCode(200)
   async getControllers() {
     return await this.passService.getControllers();
+  }
+
+  @Post('controller/create')
+  @HttpCode(201)
+  async createController(@Body() body: CreateControllerDto) {
+    return await this.passService.createController(body);
+  }
+
+  @Post('time_profile/create')
+  @HttpCode(201)
+  async createTimeProfile(@Body() body: CreateTimeProfileDto) {
+    let accessToken = body.accessToken;
+    if (!accessToken) {
+      throw new UnauthorizedException('Nimate pravic dostopati do sem');
+    }
+    return await this.passService.createTimeProfile(body, accessToken);
   }
 }

@@ -8,7 +8,7 @@ export class PassControlerEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   code: string;
 
   @Column()

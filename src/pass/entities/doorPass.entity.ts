@@ -29,11 +29,11 @@ export class DoorPassEntity {
   })
   minimum_allways_access_level: UserAccessLevel;
 
-  @Column({ comment: 'What is the code to access this door.' })
+  @Column({ comment: 'What is the code to access this door.', unique: true })
   code: string;
 
   @Exclude()
-  @Column({ comment: 'What is the secret to access this door.' })
+  @Column({ comment: 'What is the secret to access this door.', unique: true })
   access_secret: string;
 
   @OneToMany(

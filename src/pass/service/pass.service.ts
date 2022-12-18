@@ -23,6 +23,7 @@ import { PassActivityLogEntity } from '../entities/passActivityLog.entity';
 import { PassActivityLogStatus } from '../enums/passActivityLogStatus.enum';
 import { PassTimeProfileEntity } from '../entities/passTimeProfile';
 import { PassControlerEntity } from '../entities/passControler.entity';
+import { CreateTimeProfileDto } from '../dto/createTimeProfile.dto';
 
 @Injectable()
 export class PassService {
@@ -524,5 +525,25 @@ export class PassService {
 
   async getControllers() {
     return await this.passControlerRepository.find();
+  }
+
+  async createController(data) {
+    const costumeCode = crypto.randomBytes(16).toString('hex');
+    return await this.passControlerRepository.save({
+      ...data,
+      code: costumeCode,
+    });
+  }
+
+  async createTimeProfile(data: CreateTimeProfileDto, accessToken: string) {
+    const users = await this.getUsersFromAzureId(
+      data.users_azure_ids,
+      accessToken,
+    );
+    const timeProfile = await this.passTimeProfileRepository.save({
+      user_passes: users.map((user) => user.id),
+      ...data,
+    });
+    return timeProfile;
   }
 }
