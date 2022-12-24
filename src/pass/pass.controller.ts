@@ -119,7 +119,6 @@ export class PassController {
   @Post('log/door')
   @HttpCode(200)
   async getDoorLog(@Body() data: GetDoorLogDto) {
-    this.logger.debug(data);
     return await this.passService.getDoorLog(
       data.code,
       data.limit,
