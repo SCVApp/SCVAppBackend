@@ -546,4 +546,17 @@ export class PassService {
     });
     return timeProfile;
   }
+
+  async getDoorLog(code: string, limit: number, offset: number) {
+    const door = await this.getDoorWithCode(code);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    return await this.passActivityLogRepository.find({
+      where: { door_pass: { id: door.id } },
+      order: { id: 'DESC' },
+      take: limit,
+      skip: offset,
+    });
+  }
 }

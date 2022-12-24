@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
   Param,
   Post,
   UnauthorizedException,
@@ -15,12 +16,14 @@ import {
 import { CreateControllerDto } from './dto/createController.dto';
 import { CreateDoorPassDto } from './dto/createDoorPass.dto';
 import { CreateTimeProfileDto } from './dto/createTimeProfile.dto';
+import { GetDoorLogDto } from './dto/getDoorLog.dto';
 import { RenameDoorPassDto } from './dto/renameDoorPass.dto';
 import { PassService } from './service/pass.service';
 
 @Controller('pass')
 @UseInterceptors(ClassSerializerInterceptor)
 export class PassController {
+  private readonly logger = new Logger(PassController.name);
   constructor(private readonly passService: PassService) {}
 
   @Post('create_door')
@@ -111,5 +114,16 @@ export class PassController {
       throw new UnauthorizedException('Nimate pravic dostopati do sem');
     }
     return await this.passService.createTimeProfile(body, accessToken);
+  }
+
+  @Post('log/door')
+  @HttpCode(200)
+  async getDoorLog(@Body() data: GetDoorLogDto) {
+    this.logger.debug(data);
+    return await this.passService.getDoorLog(
+      data.code,
+      data.limit,
+      data.offset,
+    );
   }
 }
