@@ -54,7 +54,7 @@
     "nestjs-easyconfig": "^2.6.3",
     "nestjs-session": "^2.0.0",
     "nodemailer": "^6.8.0",
-    "passport-jwt": "^4.0.0",
+    "passport-jwt": "^4.0.1",
     "pg": "^8.8.0",
     "postgres": "^3.3.2",
     "reflect-metadata": "^0.1.13",
