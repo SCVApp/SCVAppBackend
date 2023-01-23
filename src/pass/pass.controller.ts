@@ -17,6 +17,7 @@ import { CreateControllerDto } from './dto/createController.dto';
 import { CreateDoorPassDto } from './dto/createDoorPass.dto';
 import { CreateTimeProfileDto } from './dto/createTimeProfile.dto';
 import { GetDoorLogDto } from './dto/getDoorLog.dto';
+import { GetDoorLogCountDto } from './dto/getDoorLogCount.dto';
 import { RenameDoorPassDto } from './dto/renameDoorPass.dto';
 import { PassService } from './service/pass.service';
 
@@ -124,5 +125,11 @@ export class PassController {
       data.limit,
       data.offset,
     );
+  }
+
+  @Post('log/door/count')
+  @HttpCode(200)
+  async getDoorLogCount(@Body() data: GetDoorLogCountDto) {
+    return await this.passService.getDoorLogCount(data.code);
   }
 }

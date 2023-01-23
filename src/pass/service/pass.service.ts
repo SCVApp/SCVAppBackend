@@ -559,4 +559,14 @@ export class PassService {
       skip: offset,
     });
   }
+
+  async getDoorLogCount(code: string) {
+    const door = await this.getDoorWithCode(code);
+    if (!door) {
+      throw new BadRequestException('Door not found');
+    }
+    return await this.passActivityLogRepository.count({
+      where: { door_pass: { id: door.id } },
+    });
+  }
 }
