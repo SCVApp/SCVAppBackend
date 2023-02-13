@@ -2,7 +2,7 @@
   "schools": {
     "ERS": {
       "name": "Elektro in računalniška šola",
-      "urlStrani": "https://ers.scv.si/sl/",
+      "urlStrani": "https://ers.scv.si/",
       "color": "#0094d9"
     },
     "GIM": {
@@ -12,12 +12,12 @@
     },
     "SSD": {
       "name": "Šola za storitvene dejavnosti",
-      "urlStrani": "https://storitvena.scv.si/sl/",
+      "urlStrani": "https://storitvena.scv.si/",
       "color": "#EE5BA0"
     },
     "SSGO": {
       "name": "Šola za strojništvo, geotehniko in okolje",
-      "urlStrani": "https://ssgo.scv.si/sl/",
+      "urlStrani": "https://ssgo.scv.si/",
       "color": "#a6ce39"
     },
     "MIC": {
@@ -27,7 +27,7 @@
     },
     "VSS": {
       "name": "Višja strokovna šola",
-      "urlStrani": "https://vss.scv.si/sl/",
+      "urlStrani": "https://vss.scv.si/",
       "color": "#8DD7F7"
     }
   }
