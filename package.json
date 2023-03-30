@@ -22,7 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@azure/msal-node": "^1.15.0",
+    "@azure/msal-node": "^1.16.0",
     "@microsoft/microsoft-graph-client": "^3.0.5",
     "@nestjs/axios": "^0.1.1",
     "@nestjs/common": "^9.3.9",
