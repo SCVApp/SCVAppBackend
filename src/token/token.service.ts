@@ -31,6 +31,7 @@ export class TokenService {
     this.logger.log('Token is not valid, refreshing...');
 
     const data = await this.fetchToken(token);
+    console.log(data);
     if (!data) {
       throw new UnauthorizedException('Ne morem osveziti zetona');
     }
@@ -105,9 +106,10 @@ export class TokenService {
     const signAccessToken = await this.jwtService.signAsync(
       {
         accessToken: token.accessToken,
+        user_azure_id: token.user_azure_id,
       },
       {
-        expiresIn: '30d',
+        expiresIn: '70min',
       },
     );
     const signRefreshToken = await this.jwtService.signAsync(
@@ -126,15 +128,19 @@ export class TokenService {
   }
 
   async verifyToken(token: Token): Promise<Token> {
+    let accessToken = null;
     try {
-      const accessToken = await this.jwtService.verifyAsync(token.accessToken);
+      accessToken = await this.jwtService.verifyAsync(token.accessToken);
+    } catch (e) {}
+
+    try {
       const refreshToken = await this.jwtService.verifyAsync(
         token.refreshToken,
       );
       return {
         accessToken: accessToken.accessToken,
         refreshToken: refreshToken.refreshToken,
-        expiresOn: token.expiresOn,
+        expiresOn: accessToken !== null ? token.expiresOn : null,
       };
     } catch (e) {
       return null;

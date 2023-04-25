@@ -4,4 +4,6 @@ export class Token {
   refreshToken: string;
 
   expiresOn: string;
+
+  user_azure_id?: string;
 }

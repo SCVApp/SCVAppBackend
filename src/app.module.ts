@@ -19,6 +19,8 @@ import { TicketModule } from './ticket/ticket.module';
 import { MailModule } from './mail/mail.module';
 import { PassModule } from './pass/pass.module';
 import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './common/configuration';
 
 dotenv.config();
 
@@ -44,6 +46,10 @@ dotenv.config();
     TicketModule,
     MailModule,
     PassModule,
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
 })
