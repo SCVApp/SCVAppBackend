@@ -1,14 +1,25 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  forwardRef,
+} from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 import { env } from 'process';
 import { Token } from './token.class';
 import fetch from 'node-fetch';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class TokenService {
   private readonly logger = new Logger(TokenService.name);
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+  ) {}
 
   getCookieOptions(): CookieOptions {
     return {
@@ -21,9 +32,12 @@ export class TokenService {
     };
   }
 
-  async getToken(token: Token): Promise<Token> {
-    let now = new Date();
-    let expDateUTC = new Date(token.expiresOn) || new Date();
+  async getToken(
+    token: Token,
+    needUserAzureId: boolean = false,
+  ): Promise<Token> {
+    const now = new Date();
+    const expDateUTC = new Date(token.expiresOn) || new Date();
     if (now.getTime() < expDateUTC.getTime()) {
       this.logger.log('Token is still valid');
       return token;
@@ -31,16 +45,23 @@ export class TokenService {
     this.logger.log('Token is not valid, refreshing...');
 
     const data = await this.fetchToken(token);
-    console.log(data);
     if (!data) {
       throw new UnauthorizedException('Ne morem osveziti zetona');
     }
-    let expDate = new Date(now.getTime() + data.expires_in * 1000);
-    let newtoken: Token = {
+    const expDate = new Date(now.getTime() + data.expires_in * 1000);
+
+    const newtoken: Token = {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
       expiresOn: expDate.toString(),
     };
+
+    if (needUserAzureId) {
+      const user = await this.userService.getMe(data.access_token);
+      if (user) {
+        newtoken.user_azure_id = user.id;
+      }
+    }
 
     return newtoken;
   }
@@ -138,11 +159,12 @@ export class TokenService {
         token.refreshToken,
       );
       return {
-        accessToken: accessToken.accessToken,
+        accessToken: accessToken?.accessToken,
         refreshToken: refreshToken.refreshToken,
         expiresOn: accessToken !== null ? token.expiresOn : null,
       };
     } catch (e) {
+      console.log(e);
       return null;
     }
   }
