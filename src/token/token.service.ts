@@ -93,10 +93,16 @@ export class TokenService {
   }
 
   async saveToken(token: Token, res: Response) {
-    const jwt = await this.jwtService.signAsync({
-      accessToken: token.accessToken,
-      expiresOn: token.expiresOn,
-    });
+    const jwt = await this.jwtService.signAsync(
+      {
+        accessToken: token.accessToken,
+        expiresOn: token.expiresOn,
+      },
+      {
+        expiresIn: '70min',
+      },
+    );
+
     const jwtRefreshToken = await this.jwtService.signAsync(
       {
         refreshToken: token.refreshToken,
