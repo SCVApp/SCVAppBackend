@@ -30,6 +30,7 @@ export class AdminMiddleware implements NestMiddleware {
         accessToken: jwt.accessToken,
         expiresOn: jwt.expiresOn,
         refreshToken: tokenVerify.refreshToken,
+        user_azure_id: null,
       };
       if (
         (!data.accessToken || !data.refreshToken || !data.expiresOn) &&
@@ -49,6 +50,7 @@ export class AdminMiddleware implements NestMiddleware {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         expiresOn: data.expiresOn,
+        user_azure_id: null
       };
       let token: Token;
       if (!authorization) {

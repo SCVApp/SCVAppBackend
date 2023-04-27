@@ -95,9 +95,10 @@ export class AuthController {
     @Body() body: TokenDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // console.log(body.refreshToken);
-    const verifyToken = await this.tokenService.verifyToken(body);
-    console.log(verifyToken);
+    const verifyToken = await this.tokenService.verifyToken({
+      ...body,
+      user_azure_id: null,
+    });
     if (verifyToken) {
       const token = await this.tokenService.getToken(verifyToken, true);
       if (!token) {

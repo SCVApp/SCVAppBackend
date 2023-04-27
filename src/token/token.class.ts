@@ -5,5 +5,5 @@ export class Token {
 
   expiresOn: string;
 
-  user_azure_id?: string;
+  user_azure_id: string;
 }

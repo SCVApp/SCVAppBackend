@@ -54,6 +54,7 @@ export class TokenService {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
       expiresOn: expDate.toString(),
+      user_azure_id: null,
     };
 
     if (needUserAzureId) {
@@ -151,6 +152,7 @@ export class TokenService {
       accessToken: signAccessToken,
       refreshToken: signRefreshToken,
       expiresOn: token.expiresOn,
+      user_azure_id: null,
     };
   }
 
@@ -168,6 +170,7 @@ export class TokenService {
         accessToken: accessToken?.accessToken,
         refreshToken: refreshToken.refreshToken,
         expiresOn: accessToken !== null ? token.expiresOn : null,
+        user_azure_id: accessToken !== null ? accessToken.user_azure_id : null,
       };
     } catch (e) {
       console.log(e);
@@ -203,6 +206,7 @@ export class TokenService {
       accessToken: accessToken,
       refreshToken: refreshToken,
       expiresOn: expiresIn,
+      user_azure_id: null,
     };
   }
 }
