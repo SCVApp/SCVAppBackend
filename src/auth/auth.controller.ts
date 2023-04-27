@@ -4,25 +4,26 @@ import {
   Controller,
   Get,
   Headers,
+  Inject,
   Logger,
   Post,
   Query,
   Redirect,
   Res,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
-import { TokenDto } from '../token/token.dto';
 import { TokenService } from 'src/token/token.service';
+import { TokenDto } from '../token/token.dto';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   constructor(
     private readonly authServices: AuthService,
-    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => TokenService))
     private readonly tokenService: TokenService,
   ) {}
 
@@ -94,9 +95,11 @@ export class AuthController {
     @Body() body: TokenDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    // console.log(body.refreshToken);
     const verifyToken = await this.tokenService.verifyToken(body);
+    console.log(verifyToken);
     if (verifyToken) {
-      const token = await this.tokenService.getToken(verifyToken);
+      const token = await this.tokenService.getToken(verifyToken, true);
       if (!token) {
         throw new UnauthorizedException('Ne morem osveziti zetona');
       }

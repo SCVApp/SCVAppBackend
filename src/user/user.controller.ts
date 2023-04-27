@@ -11,9 +11,10 @@ import {
   Post,
   NotFoundException,
   HttpCode,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { ResponseType } from '@microsoft/microsoft-graph-client';
 import { env } from 'process';
@@ -24,7 +25,7 @@ import { GetClassScheduleDto } from './dtos/getClassSchedule.dto';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => TokenService))
     private readonly tokenService: TokenService,
   ) {}
 

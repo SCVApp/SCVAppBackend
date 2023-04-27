@@ -15,19 +15,19 @@ import { AdminModule } from './admin/admin.module';
 import * as dotenv from 'dotenv';
 import { AdminMiddleware } from './admin/middleware/admin.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TicketModule } from './ticket/ticket.module';
-import { MailModule } from './mail/mail.module';
 import { PassModule } from './pass/pass.module';
 import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './common/configuration';
 
 dotenv.config();
 
 @Module({
   imports: [
     AuthModule,
+    UserModule,
     CommonModule,
     TokenModule,
-    UserModule,
     SearchModule,
     AdminModule,
     TypeOrmModule.forRoot({
@@ -41,9 +41,11 @@ dotenv.config();
       entities: [],
       synchronize: true,
     }),
-    TicketModule,
-    MailModule,
     PassModule,
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
 })

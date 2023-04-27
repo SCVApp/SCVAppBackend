@@ -27,22 +27,22 @@ export class AuthService {
       accessType: 'offline',
     };
     try {
-      let respons = await clientApplication.acquireTokenByCode(tokenRequest); //Zahtevamo dostopni žeton, žeton za osvežitev,... od uporabnika
+      const respons = await clientApplication.acquireTokenByCode(tokenRequest); //Zahtevamo dostopni žeton, žeton za osvežitev,... od uporabnika
       const tokenCache = clientApplication.getTokenCache().serialize(); // Iz predpomnilnika zahtevamo podake
       const refreshTokenObject = JSON.parse(tokenCache).RefreshToken;
-      let homeAccountId = respons.account.homeAccountId;
+      const homeAccountId = respons.account.homeAccountId;
       let refreshToken = ''; //Žeton za osvežitev
       Object.entries(refreshTokenObject).forEach((item: any) => {
         if (item[1].home_account_id === homeAccountId) {
           refreshToken = item[1].secret;
         }
       });
-
       const token: Token = {
         //Žeton, ki ga shranimo v uporabnikovo sejo ali v primeru mobilne aplikacije v pomnilnik in vsebuje:
         accessToken: respons.accessToken, //Dostopni žeton
         refreshToken: refreshToken, //Žeton za osvežitev
         expiresOn: respons.expiresOn.toString(), //Rok trajanja dostopnega žetona
+        user_azure_id: respons.account.localAccountId, //ID uporabnika v Azure AD
       };
       return token;
     } catch (e) {

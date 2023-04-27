@@ -42,3 +42,4 @@ data/
 backup/
 docker-compose.yml
 .dockerignore
+certs/
