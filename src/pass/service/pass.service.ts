@@ -250,9 +250,17 @@ export class PassService {
       const trenutneUre = trenutnoNaUrniku.ura;
       const doorNameId = door.name_id;
       const uraInDoorNameId = trenutneUre.find(
-        (ura) => ura.ucilnica === doorNameId,
+        (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
       );
       if (uraInDoorNameId) {
+        return true;
+      }
+      const naslednjeUre = urnik.trenutnoNaUrniku.naslednjaUra;
+      const naslednjaUraInDoorNameId = naslednjeUre.ura.find(
+        (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
+      );
+      const timeDiff = naslednjeUre.doUre;
+      if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
         return true;
       }
     }
