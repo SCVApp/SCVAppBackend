@@ -255,11 +255,14 @@ export class PassService {
       if (uraInDoorNameId) {
         return true;
       }
-      const naslednjeUre = urnik.trenutnoNaUrniku.naslednjaUra;
-      const naslednjaUraInDoorNameId = naslednjeUre.ura.find(
+      const naslednjeUre = urnik.trenutnoNaUrniku?.naslednjaUra;
+      if (!naslednjeUre) {
+        return false;
+      }
+      const naslednjaUraInDoorNameId = naslednjeUre?.ura?.find(
         (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
       );
-      const timeDiff = naslednjeUre.doUre;
+      const timeDiff = naslednjeUre?.doUre;
       if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
         return true;
       }
