@@ -256,15 +256,14 @@ export class PassService {
         return true;
       }
       const naslednjeUre = urnik.trenutnoNaUrniku?.naslednjaUra;
-      if (!naslednjeUre) {
-        return false;
-      }
-      const naslednjaUraInDoorNameId = naslednjeUre?.ura?.find(
-        (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
-      );
-      const timeDiff = naslednjeUre?.doUre;
-      if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
-        return true;
+      if (naslednjeUre) {
+        const naslednjaUraInDoorNameId = naslednjeUre?.ura?.find(
+          (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
+        );
+        const timeDiff = naslednjeUre?.doUre;
+        if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
+          return true;
+        }
       }
     }
 
@@ -444,6 +443,12 @@ export class PassService {
 
   async getAllDoorPasses() {
     return await this.doorPassRepository.find();
+  }
+
+  async getAllDoorPassesForUser() {
+    return await this.doorPassRepository.find({
+      select: ['name_id', 'code'],
+    });
   }
 
   async getDoorWithId(id: number) {

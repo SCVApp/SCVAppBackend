@@ -66,6 +66,10 @@ export class AppModule implements NestModule {
           path: 'pass/get_door/:code',
           method: RequestMethod.GET,
         },
+        {
+          path: 'pass/all_doors_user',
+          method: RequestMethod.GET,
+        },
       );
     consumer
       .apply(AdminMiddleware)
@@ -73,6 +77,10 @@ export class AppModule implements NestModule {
         { path: 'pass/open_door/:code', method: RequestMethod.GET },
         { path: 'pass/get_door/:code', method: RequestMethod.GET },
         { path: 'pass/door/is_opened', method: RequestMethod.GET },
+        {
+          path: 'pass/all_doors_user',
+          method: RequestMethod.GET,
+        },
       )
       .forRoutes('admin', 'pass');
 

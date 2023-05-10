@@ -39,6 +39,12 @@ export class PassController {
     return await this.passService.getAllDoorPasses();
   }
 
+  @Get('all_doors_user')
+  @HttpCode(200)
+  async getAllDoorsPassesUser() {
+    return await this.passService.getAllDoorPassesForUser();
+  }
+
   @Get('open_door/:code')
   @HttpCode(200)
   async openDoor(
