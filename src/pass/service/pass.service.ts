@@ -448,6 +448,7 @@ export class PassService {
   async getAllDoorPassesForUser() {
     return await this.doorPassRepository.find({
       select: ['name_id', 'code'],
+      loadEagerRelations: false,
     });
   }
 
