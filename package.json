@@ -26,7 +26,7 @@
     "@microsoft/microsoft-graph-client": "^3.0.5",
     "@nestjs/axios": "^0.1.1",
     "@nestjs/common": "^9.4.2",
-    "@nestjs/config": "^2.3.2",
+    "@nestjs/config": "^2.3.3",
     "@nestjs/core": "^9.4.2",
     "@nestjs/jwt": "^10.0.3",
     "@nestjs/platform-express": "^9.4.2",
