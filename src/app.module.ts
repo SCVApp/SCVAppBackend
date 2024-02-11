@@ -18,6 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassModule } from './pass/pass.module';
 import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
 import { ConfigModule } from '@nestjs/config';
+import { NotificationModule } from './notification/notification.module';
 import configuration from './common/configuration';
 
 dotenv.config();
@@ -46,6 +47,7 @@ dotenv.config();
       load: [configuration],
       isGlobal: true,
     }),
+    NotificationModule,
   ],
   controllers: [AppController],
 })
@@ -57,6 +59,7 @@ export class AppModule implements NestModule {
         { path: 'user/logoutUrl', method: RequestMethod.GET },
         { path: 'user/logout', method: RequestMethod.GET },
         { path: 'user/schedule', method: RequestMethod.POST },
+        { path: 'notification', method: RequestMethod.GET },
       )
       .forRoutes(
         'user',
