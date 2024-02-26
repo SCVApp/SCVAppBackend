@@ -12,4 +12,6 @@ export class TokenDto {
   @IsNotEmpty()
   @IsString()
   expiresOn: string;
+
+  notificationToken?: string;
 }

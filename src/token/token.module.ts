@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { TokenService } from './token.service';
 import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
 import { CommonModule } from 'src/common/common.module';
 import { UserModule } from 'src/user/user.module';
+import { TokenService } from './token.service';
 
 @Module({
   imports: [

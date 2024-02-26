@@ -5,12 +5,12 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
-import { CookieOptions, Response } from 'express';
-import { env } from 'process';
-import { Token } from './token.class';
-import fetch from 'node-fetch';
 import { JwtService } from '@nestjs/jwt';
+import { CookieOptions, Response } from 'express';
+import fetch from 'node-fetch';
+import { env } from 'process';
 import { UserService } from 'src/user/user.service';
+import { Token } from './token.class';
 
 @Injectable()
 export class TokenService {

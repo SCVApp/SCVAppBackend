@@ -17,6 +17,7 @@ import { Response } from 'express';
 import { TokenService } from 'src/token/token.service';
 import { TokenDto } from '../token/token.dto';
 import { AuthService } from './auth.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Controller('auth')
 export class AuthController {
@@ -25,6 +26,8 @@ export class AuthController {
     private readonly authServices: AuthService,
     @Inject(forwardRef(() => TokenService))
     private readonly tokenService: TokenService,
+    @Inject(forwardRef(() => NotificationService))
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Get('/authUrl/')
@@ -101,6 +104,14 @@ export class AuthController {
     });
     if (verifyToken) {
       const token = await this.tokenService.getToken(verifyToken, true);
+      if (body.notificationToken) {
+        //Dodajanje novega naprave v bazo ali posodabljanje tokena
+        this.notificationService.addNewDevice(
+          body.notificationToken,
+          token.user_azure_id,
+          token.accessToken,
+        );
+      }
       if (!token) {
         throw new UnauthorizedException('Ne morem osveziti zetona');
       }
