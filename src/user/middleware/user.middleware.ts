@@ -17,12 +17,13 @@ export class UserMiddleware implements NestMiddleware {
       req.headers.authorization,
     );
     if (authorization) {
-      req.body.accessToken = authorization;
+      req.body.accessToken = authorization.accessToken || undefined;
+      req.body.azure_id = authorization.user_azure_id || undefined;
       return next();
     }
     try {
-      const cookieToken:string = req.cookies['token'] || null;
-      const cookieJwt:string = req.cookies['jwt'] || null;
+      const cookieToken: string = req.cookies['token'] || null;
+      const cookieJwt: string = req.cookies['jwt'] || null;
       const token: Token = await this.tokenService.verifyTokenFromCookie(
         cookieJwt,
         cookieToken,
@@ -42,6 +43,7 @@ export class UserMiddleware implements NestMiddleware {
       if (newToken) {
         req.body.accessToken = newToken.accessToken || undefined;
         req.body.token = newToken || undefined;
+        req.body.azure_id = newToken.user_azure_id || undefined;
         await this.tokenService.saveToken(newToken, res);
         return next();
       }

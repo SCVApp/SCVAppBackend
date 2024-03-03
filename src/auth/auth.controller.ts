@@ -9,15 +9,16 @@ import {
   Post,
   Query,
   Redirect,
+  Req,
   Res,
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { NotificationService } from 'src/notification/notification.service';
 import { TokenService } from 'src/token/token.service';
 import { TokenDto } from '../token/token.dto';
 import { AuthService } from './auth.service';
-import { NotificationService } from 'src/notification/notification.service';
 
 @Controller('auth')
 export class AuthController {
@@ -109,6 +110,7 @@ export class AuthController {
         this.notificationService.addNewDevice(
           body.notificationToken,
           token.user_azure_id,
+          body.deviceId,
           token.accessToken,
         );
       }
@@ -121,5 +123,23 @@ export class AuthController {
     } else {
       throw new UnauthorizedException('Ne morem osveziti zetona');
     }
+  }
+
+  @Post('logout')
+  async logout(
+    @Body('notificationToken') notificationToken: string,
+    @Req() req: any,
+  ) {
+    const accessToken = req.body.accessToken;
+    const azure_id = req.body.azure_id;
+    if (!accessToken) {
+      throw new UnauthorizedException('Nimate pravic dostopati do sem');
+    }
+    await this.notificationService.removeDevice(
+      notificationToken,
+      azure_id,
+      accessToken,
+    );
+    return 'Device removed';
   }
 }

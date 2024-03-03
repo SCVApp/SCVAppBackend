@@ -14,4 +14,5 @@ export class TokenDto {
   expiresOn: string;
 
   notificationToken?: string;
+  deviceId?: string;
 }

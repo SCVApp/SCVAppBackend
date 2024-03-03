@@ -116,7 +116,7 @@ export class TokenService {
     res.cookie('token', jwtRefreshToken, this.getCookieOptions());
   }
 
-  async verifyAuthHeader(authorization: string): Promise<string> {
+  async verifyAuthHeader(authorization: string): Promise<Token> {
     if (!authorization) {
       return null;
     }
@@ -125,7 +125,7 @@ export class TokenService {
     }
     try {
       let data = await this.jwtService.verifyAsync(authorization);
-      return data.accessToken;
+      return data as Token;
     } catch (e) {
       return null;
     }

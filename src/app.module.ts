@@ -73,6 +73,10 @@ export class AppModule implements NestModule {
           path: 'pass/all_doors_user',
           method: RequestMethod.GET,
         },
+        {
+          path: 'auth/logout',
+          method: RequestMethod.POST,
+        },
       );
     consumer
       .apply(AdminMiddleware)

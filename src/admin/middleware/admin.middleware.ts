@@ -50,7 +50,7 @@ export class AdminMiddleware implements NestMiddleware {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         expiresOn: data.expiresOn,
-        user_azure_id: null
+        user_azure_id: null,
       };
       let token: Token;
       if (!authorization) {
@@ -63,7 +63,7 @@ export class AdminMiddleware implements NestMiddleware {
       if (!authorization) {
         accessToken = token.accessToken || '';
       } else {
-        accessToken = authorization;
+        accessToken = authorization.accessToken || '';
       }
 
       req.body.accessToken = accessToken || undefined;
@@ -83,7 +83,10 @@ export class AdminMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Nimate pravic dostopati do sem');
       } else {
         req.body.accessToken = authorization;
-        if ((await this.adminService.checkAdmin(authorization)) === true) {
+        if (
+          (await this.adminService.checkAdmin(authorization.accessToken)) ===
+          true
+        ) {
           next();
         } else {
           throw new UnauthorizedException('Nimate pravic dostopati do sem');
