@@ -36,7 +36,7 @@ export class NotificationService {
           body: body,
         },
         data: {
-          newsUrl: 'https://ers.scv.si/novice/pust-na-ers/',
+          maliceUrl: 'https://malice.scv.si/?date=8-3-2024',
         },
       },
       tokens,
