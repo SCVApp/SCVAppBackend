@@ -89,7 +89,7 @@ export class AppModule implements NestModule {
           method: RequestMethod.GET,
         },
       )
-      .forRoutes('admin', 'pass');
+      .forRoutes('admin', 'pass', 'notification');
 
     consumer.apply(DoorPassMiddleware).forRoutes('pass/door/is_opened', {
       path: 'user/schedule',
