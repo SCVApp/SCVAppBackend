@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeviceEntity } from './entities/device.entity';
 import { PassService } from 'src/pass/service/pass.service';
+import { ApiKeyEntity } from './entities/apiKey.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class NotificationService {
@@ -20,6 +22,8 @@ export class NotificationService {
   constructor(
     @InjectRepository(DeviceEntity)
     private readonly deviceRepository: Repository<DeviceEntity>,
+    @InjectRepository(ApiKeyEntity)
+    private readonly apiKeyRepository: Repository<ApiKeyEntity>,
     @Inject(forwardRef(() => PassService))
     private readonly passService: PassService,
   ) {}
@@ -29,6 +33,45 @@ export class NotificationService {
       (device) => device.notification_token,
     );
     this.logger.log('Sending notification to all devices');
+    this.FCM.sendToMultipleToken(
+      {
+        notification: {
+          title: title,
+          body: body,
+        },
+        data: {
+          maliceUrl: 'https://malice.scv.si/?date=8-3-2024',
+        },
+      },
+      tokens,
+      (err, response) => {
+        if (err) {
+          this.logger.error('Notification sending failed');
+          this.logger.error(err);
+        } else {
+          this.logger.log('Notification sent');
+          this.logger.log(response);
+        }
+      },
+    );
+  }
+
+  async getDeviceTokensByRazred(razredi: string[]) {
+    const devices = await this.deviceRepository
+      .createQueryBuilder('device')
+      .innerJoinAndSelect('device.user', 'user')
+      .where('user.razred IN (:...razredi)', { razredi })
+      .getMany();
+    return devices.map((device) => device.notification_token);
+  }
+
+  async sendNotificationToSpecific(
+    title: string,
+    body: string,
+    razredi: string[],
+  ) {
+    const tokens = await this.getDeviceTokensByRazred(razredi);
+    this.logger.log('Sending notification to specific devices');
     this.FCM.sendToMultipleToken(
       {
         notification: {
@@ -120,5 +163,22 @@ export class NotificationService {
     }
     this.logger.log('Device removed', device.device_id);
     await this.deviceRepository.remove(device);
+  }
+
+  async createApiKey(description: string) {
+    const key = crypto.randomBytes(64).toString('hex');
+    const apiKey = this.apiKeyRepository.create({
+      key,
+      description,
+      created_at: new Date(),
+      updated_at: new Date(),
+      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) /* 30 days */,
+    });
+    await this.apiKeyRepository.save(apiKey);
+    return apiKey;
+  }
+
+  async findApiKey(key: string) {
+    return this.apiKeyRepository.findOne({ where: { key } });
   }
 }

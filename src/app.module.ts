@@ -20,6 +20,7 @@ import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { NotificationModule } from './notification/notification.module';
 import configuration from './common/configuration';
+import { APIMiddleware } from './notification/middleware/api.middleware';
 
 dotenv.config();
 
@@ -88,6 +89,10 @@ export class AppModule implements NestModule {
           path: 'pass/all_doors_user',
           method: RequestMethod.GET,
         },
+        {
+          path: 'notification/send_to_specific',
+          method: RequestMethod.POST,
+        },
       )
       .forRoutes('admin', 'pass', 'notification');
 
@@ -95,5 +100,13 @@ export class AppModule implements NestModule {
       path: 'user/schedule',
       method: RequestMethod.POST,
     });
+
+    consumer
+      .apply(APIMiddleware)
+      .exclude(
+        { path: 'notification/send', method: RequestMethod.POST },
+        { path: 'notification/create_api_key', method: RequestMethod.POST },
+      )
+      .forRoutes('notification');
   }
 }

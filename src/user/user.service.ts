@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Client, ResponseType } from '@microsoft/microsoft-graph-client';
 import 'isomorphic-fetch'; //Potrebujemo za microsoft client
 import { DateTime } from 'luxon'; //Za urnik
@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
   getClient(accessToken: string) {
     const client = Client.init({
       defaultVersion: 'v1.0',

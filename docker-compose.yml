@@ -7,8 +7,11 @@ services:
       dockerfile: ./Dockerfile
     container_name: backend
     restart: always
+    environment:
+      - NODE_ENV=production
     ports:
-      - 5050:5050
+      - 80:5050
+
     depends_on:
       - postgres
     links:
