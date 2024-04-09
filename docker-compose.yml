@@ -52,8 +52,9 @@ services:
       - pgdata:/var/lib/pgadmin
 
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer-ee:latest
     container_name: portainer
+    restart: always
     ports:
       - '9000:9000'
       - '9443:9443'
