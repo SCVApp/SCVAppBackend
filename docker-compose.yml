@@ -5,13 +5,12 @@ services:
     image: nginx:alpine
     container_name: nginx
     ports:
-      - "443:443"
+      - '443:443'
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
       - backend
-
   backend:
     build:
       context: .
@@ -19,6 +18,11 @@ services:
     container_name: backend
     environment:
       - NODE_ENV=production
+      - DB_NAME=SCVApp
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
     depends_on:
       - postgres
 
@@ -31,4 +35,3 @@ services:
       POSTGRES_DB: SCVApp
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-
