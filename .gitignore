@@ -36,10 +36,8 @@ lerna-debug.log*
 .env
 dist.zip
 src.zip
-Dockerfile
 .env.production
 data/
 backup/
-docker-compose.yml
 .dockerignore
 certs/
