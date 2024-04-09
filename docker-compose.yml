@@ -6,9 +6,11 @@ services:
     container_name: nginx
     ports:
       - '443:443'
+      - '80:80'
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./webroot:/var/www/html
+      - /etc/letsencrypt:/etc/letsencrypt
     depends_on:
       - backend
   backend:
