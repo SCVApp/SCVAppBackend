@@ -9,9 +9,13 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=SCVApp
     ports:
       - 80:5050
-
     depends_on:
       - postgres
     links:
