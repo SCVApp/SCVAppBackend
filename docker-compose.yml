@@ -48,3 +48,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     depends_on:
       - postgres
+    volumes:
+      - pgdata:/var/lib/pgadmin
+
+volumes:
+  pgdata:
