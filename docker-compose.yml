@@ -56,6 +56,8 @@ services:
     container_name: portainer
     restart: always
     labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`scvapp.krepel.tech`) && PathPrefix(`/portainer`)
       - traefik.http.middlewares.strip-prefix.chain.middlewares=strip-prefix-1,strip-prefix-2
       - traefik.http.middlewares.strip-prefix-1.redirectregex.regex=^(https?://[^/]+/[a-z0-9_]+)$$
       - traefik.http.middlewares.strip-prefix-1.redirectregex.replacement=$${1}/
