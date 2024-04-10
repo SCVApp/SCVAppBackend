@@ -55,9 +55,6 @@ services:
     image: portainer/portainer-ee:latest
     container_name: portainer
     restart: always
-    ports:
-      - '9000:9000'
-      - '9443:9443'
     labels:
       - traefik.http.middlewares.strip-prefix.chain.middlewares=strip-prefix-1,strip-prefix-2
       - traefik.http.middlewares.strip-prefix-1.redirectregex.regex=^(https?://[^/]+/[a-z0-9_]+)$$
