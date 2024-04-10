@@ -55,6 +55,9 @@ services:
     image: portainer/portainer-ee:latest
     container_name: portainer
     restart: always
+    ports:
+      - 9000:9000
+      - 9443:9443
     labels:
       - traefik.enable=true
       - traefik.http.routers.portainer.rule=Host(`scvapp.krepel.tech`) && PathPrefix(`/portainer`)
