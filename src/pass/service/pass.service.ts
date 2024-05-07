@@ -77,7 +77,9 @@ export class PassService {
         azure_id: userFromAzure.id,
       });
     } catch (e) {
-      return null;
+      return await this.userPassRepository.findOne({
+        where: { azure_id: azureId === '' ? userFromAzure.id : azureId },
+      });
     }
   }
   async getUsersFromAzureId(azureId: string[], accessToken: string) {
