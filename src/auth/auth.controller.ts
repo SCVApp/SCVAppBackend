@@ -64,34 +64,39 @@ export class AuthController {
   @Get('redirect')
   async redirect(@Query() query, @Res() res: Response) {
     // Funkcija za preusmeritev iz Microsofta po prijavi
-    let code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
-    let state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil
-    if (code === '') {
-      //Preverimo če je koda prazna
-      throw new BadRequestException();
-    }
+    try {
+      let code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
+      let state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil
+      if (code === '') {
+        //Preverimo če je koda prazna
+        throw new BadRequestException();
+      }
 
-    const token = await this.authServices.getToken(code);
-    if (token) {
-      await this.tokenService.saveToken(token, res);
+      const token = await this.authServices.getToken(code);
+      if (token) {
+        await this.tokenService.saveToken(token, res);
+      }
+      if (state === 'appscv') {
+        //app.scv.si
+        return res.redirect('https://app.scv.si/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
+      } else if (state === 'localhost') {
+        //localhost
+        return res.redirect('http://localhost:3000/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
+      } else if (state === 'testnaappscv') {
+        return res.redirect('https://testna.app.scv.si/?success=signin');
+      }
+      const signToken = await this.tokenService.signToken(token);
+      return res.redirect(
+        `scvapp://app.scv.si/mobileapp?accessToken=${
+          signToken.accessToken
+        }&refreshToken=${signToken.refreshToken}&expiresOn=${encodeURIComponent(
+          signToken.expiresOn,
+        )}`,
+      );
+    } catch (e) {
+      this.logger.error('Napaka pri preusmeritvi uporabnika, napaka: ', e);
+      return res.redirect('https://app.scv.si/?error=signin');
     }
-    if (state === 'appscv') {
-      //app.scv.si
-      return res.redirect('https://app.scv.si/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
-    } else if (state === 'localhost') {
-      //localhost
-      return res.redirect('http://localhost:3000/?success=signin'); //Tukaj preusmerimo uporabnika iz katere platforme je prišel
-    } else if (state === 'testnaappscv') {
-      return res.redirect('https://testna.app.scv.si/?success=signin');
-    }
-    const signToken = await this.tokenService.signToken(token);
-    return res.redirect(
-      `scvapp://app.scv.si/mobileapp?accessToken=${
-        signToken.accessToken
-      }&refreshToken=${signToken.refreshToken}&expiresOn=${encodeURIComponent(
-        signToken.expiresOn,
-      )}`,
-    );
   }
 
   @Post('refreshToken')
