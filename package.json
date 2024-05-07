@@ -45,7 +45,7 @@
     "dotenv": "^16.1.4",
     "express-session": "^1.17.3",
     "fastify": "^4.17.0",
-    "fastify-cookie": "^5.7.0",
+    "@fastify/cookie": "^6.0.0",
     "fcm-notification": "^2.0.0",
     "html-to-text": "^9.0.0",
     "imap-simple": "^1.6.3",
