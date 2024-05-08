@@ -82,7 +82,6 @@ export class PassGateway {
             }
           });
       });
-      this.logger.log(response);
       return response[0] === 'ok';
     } catch (e) {
       return false;
