@@ -36,7 +36,7 @@ export class DoorPassMiddleware implements NestMiddleware {
         next();
       }
     } catch (e) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(e.message);
     }
   }
 }
