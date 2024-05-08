@@ -16,18 +16,20 @@ export class DoorPassMiddleware implements NestMiddleware {
       const accessSecret: string = req.headers['access_secret'] as string;
       const code: string = req.headers['door_code'] as string;
       if (!accessSecret || accessSecret === '' || !code || code === '') {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(
+          'Access secret or door code is missing',
+        );
       }
       const door = await this.passService.getDoorWithCode(code);
       if (!door) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException("Door doesn't exist");
       }
       const isMatch = await this.passService.compareHash(
         door.access_secret,
         accessSecret,
       );
       if (!isMatch) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException('Access secret is invalid');
       }
       if (door.code === code) {
         req.body.door = door;
