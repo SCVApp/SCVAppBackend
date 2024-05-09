@@ -19,8 +19,8 @@ export class NotificationController {
   async sendNotificationToSpecific(@Body() data: SendToSpecificDto) {
     const { body, title, razredi } = data;
     await this.notificationService.sendNotificationToSpecific(
-      body,
       title,
+      body,
       razredi,
     );
     return 'Notification sent';
