@@ -259,13 +259,13 @@ export class PassService {
       }
       const naslednjeUre = urnik.trenutnoNaUrniku?.naslednjaUra;
       if (naslednjeUre) {
-        this.logger.log(naslednjeUre);
+        this.logger.log('Naslednja ura: ', naslednjeUre);
         const naslednjaUraInDoorNameId = naslednjeUre?.ura?.find(
           (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
         );
-        this.logger.log(naslednjaUraInDoorNameId);
+        this.logger.log('DoorId:', naslednjaUraInDoorNameId);
         const timeDiff = naslednjeUre?.doUre;
-        this.logger.log(timeDiff);
+        this.logger.log('Time diff: ', timeDiff);
         if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
           return true;
         }
