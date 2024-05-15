@@ -13,6 +13,7 @@ import {
   HttpCode,
   forwardRef,
   Inject,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UserService } from './user.service';
@@ -23,6 +24,7 @@ import { GetClassScheduleDto } from './dtos/getClassSchedule.dto';
 
 @Controller('user')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
   constructor(
     private readonly userService: UserService,
     @Inject(forwardRef(() => TokenService))

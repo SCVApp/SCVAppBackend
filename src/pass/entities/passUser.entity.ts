@@ -14,7 +14,7 @@ export class UserPassEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   azure_id: string;
 
   @Column({ nullable: true, type: 'enum', enum: UserAccessLevel })

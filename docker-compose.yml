@@ -1,17 +1,32 @@
 #create docker compose file for the application nestjs and postgresql
 version: '3'
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - '443:443'
+      - '80:80'
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./webroot:/var/www/html
+      - /etc/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - backend
   backend:
     build:
       context: .
       dockerfile: ./Dockerfile
     container_name: backend
     restart: always
-    ports:
-      - 5050:5050
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=SCVApp
     depends_on:
-      - postgres
-    links:
       - postgres
 
   postgres:
@@ -24,3 +39,29 @@ services:
       POSTGRES_DB: SCVApp
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: info.app@scv.si
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+    volumes:
+      - pgdata:/var/lib/pgadmin
+
+  portainer:
+    image: portainer/portainer-ee:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - 9000:9000
+      - 9443:9443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes:
+  pgdata:
+  portainer_data:

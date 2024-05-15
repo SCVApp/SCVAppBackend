@@ -77,7 +77,9 @@ export class PassService {
         azure_id: userFromAzure.id,
       });
     } catch (e) {
-      return null;
+      return await this.userPassRepository.findOne({
+        where: { azure_id: azureId === '' ? userFromAzure.id : azureId },
+      });
     }
   }
   async getUsersFromAzureId(azureId: string[], accessToken: string) {
@@ -257,10 +259,13 @@ export class PassService {
       }
       const naslednjeUre = urnik.trenutnoNaUrniku?.naslednjaUra;
       if (naslednjeUre) {
+        this.logger.log('Naslednja ura: ', naslednjeUre);
         const naslednjaUraInDoorNameId = naslednjeUre?.ura?.find(
           (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
         );
-        const timeDiff = naslednjeUre?.doUre;
+        this.logger.log('DoorId:', naslednjaUraInDoorNameId);
+        const timeDiff = naslednjeUre?.zacetekUreM;
+        this.logger.log('Time diff: ', timeDiff);
         if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
           return true;
         }
