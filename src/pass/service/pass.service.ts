@@ -264,7 +264,8 @@ export class PassService {
           (ura) => ura.ucilnica === doorNameId && ura.odpadlo === false,
         );
         this.logger.log('DoorId:', naslednjaUraInDoorNameId);
-        const timeDiff = naslednjeUre?.zacetekUreM;
+        const zacetekUreM = naslednjeUre?.zacetekUreM;
+        const timeDiff = zacetekUreM - new Date().getTime();
         this.logger.log('Time diff: ', timeDiff);
         if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
           return true;
