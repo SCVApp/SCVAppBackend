@@ -24,6 +24,7 @@ import { PassActivityLogStatus } from '../enums/passActivityLogStatus.enum';
 import { PassTimeProfileEntity } from '../entities/passTimeProfile';
 import { PassControlerEntity } from '../entities/passControler.entity';
 import { CreateTimeProfileDto } from '../dto/createTimeProfile.dto';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class PassService {
@@ -265,7 +266,11 @@ export class PassService {
         );
         this.logger.log('DoorId:', naslednjaUraInDoorNameId);
         const zacetekUreM = naslednjeUre?.zacetekUreM;
-        const timeDiff = zacetekUreM - new Date().getTime();
+        const trenutnoM = DateTime.now().setLocale('sl-SI');
+        const timeDiff = trenutnoM.diff(
+          zacetekUreM,
+          'milliseconds',
+        ).milliseconds;
         this.logger.log('Time diff: ', timeDiff);
         if (naslednjaUraInDoorNameId && timeDiff < 5 * 60 * 1000) {
           return true;
