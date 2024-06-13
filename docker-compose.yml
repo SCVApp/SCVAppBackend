@@ -40,17 +40,6 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: info.app@scv.si
-      PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      - postgres
-    volumes:
-      - pgdata:/var/lib/pgadmin
-
   portainer:
     image: portainer/portainer-ee:latest
     container_name: portainer
