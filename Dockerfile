@@ -1,4 +1,4 @@
-FROM node:22-alpine3.19 AS builder
+FROM node:16-alpine3.19 AS builder
 
 RUN apk add g++ make py3-pip
 
