@@ -1,4 +1,4 @@
-FROM node:18-alpine3.19 AS builder
+FROM node:22-alpine3.19 AS builder
 
 RUN apk add g++ make py3-pip
 
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 
-FROM node:16-alpine AS runner
+FROM node:22-alpine3.19 AS runner
 
 WORKDIR /app
 
