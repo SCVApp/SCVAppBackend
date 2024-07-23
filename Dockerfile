@@ -6,8 +6,6 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./ 
 
-RUN npm install
-
 RUN npm ci
 
 RUN npm i -g @nestjs/cli
