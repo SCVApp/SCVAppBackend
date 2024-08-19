@@ -22,7 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@azure/msal-node": "^2.11.1",
+    "@azure/msal-node": "^2.12.0",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.3.10",
@@ -35,7 +35,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.3.8",
     "@types/express-session": "^1.18.0",
-    "axios": "^1.7.0",
+    "axios": "^1.7.4",
     "bcrypt": "^5.1.0",
     "blob-util": "^2.0.2",
     "cheerio": "^1.0.0-rc.12",
