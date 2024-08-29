@@ -33,7 +33,7 @@
     "@nestjs/platform-fastify": "^10.3.10",
     "@nestjs/platform-socket.io": "^10.3.8",
     "@nestjs/typeorm": "^10.0.2",
-    "@nestjs/websockets": "^10.3.8",
+    "@nestjs/websockets": "^10.3.10",
     "@types/express-session": "^1.18.0",
     "axios": "^1.7.4",
     "bcrypt": "^5.1.0",
