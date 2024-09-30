@@ -35,7 +35,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.4.1",
     "@types/express-session": "^1.18.0",
-    "axios": "^1.7.6",
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.0",
     "blob-util": "^2.0.2",
     "cheerio": "^1.0.0",
