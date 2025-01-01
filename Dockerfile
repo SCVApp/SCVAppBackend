@@ -4,7 +4,7 @@ RUN apk add g++ make py3-pip
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./ 
+COPY package.json package-lock.json ./
 
 RUN npm ci
 
@@ -27,7 +27,7 @@ COPY --from=builder /app/dist ./dist
 
 COPY --from=builder /app/src ./src
 
-COPY --from=builder /app/.env.production ./.env
+# COPY --from=builder /app/.env.production ./.env
 
 EXPOSE 5050
 
