@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Res, Session } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Query,
+  Res,
+  Session,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 @Controller()
@@ -10,6 +17,6 @@ export class AppController {
 
   @Get('up')
   getUp(@Res() res: Response) {
-    return res.json({ status: 'up' });
+    return res.status(HttpStatus.OK).send('UP');
   }
 }

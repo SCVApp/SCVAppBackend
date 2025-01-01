@@ -74,8 +74,3 @@ ssh:
 # version inside the asset_path.
 #
 # asset_path: /app/public/assets
-
-# Configure rolling deploys by setting a wait time between batches of restarts.
-#
-boot:
-  wait: 10
