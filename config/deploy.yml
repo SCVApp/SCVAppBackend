@@ -22,6 +22,8 @@ proxy:
   host: backend.app.scv.si
   # Proxy connects to your container on port 80 by default.
   app_port: 5050
+  response_timeout: 60
+  forward_headers: true
 
 # Credentials for your image host.
 registry:
