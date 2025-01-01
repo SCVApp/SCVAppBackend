@@ -51,6 +51,8 @@ env:
     - OAUTH_APP_CLIENT_SECRET
     - OAUTH_SCOPES
     - OAUTH_REDIRECT_URI
+    - JWT_PRIVATE_KEY
+    - JWT_PUBLIC_KEY
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.
