@@ -17,6 +17,6 @@ export class AppController {
 
   @Get('up')
   getUp(@Res() res: Response) {
-    return res.status(HttpStatus.OK).send('UP');
+    return res.status(HttpStatus.OK).json({ status: 'up' });
   }
 }
