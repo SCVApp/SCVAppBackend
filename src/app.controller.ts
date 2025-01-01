@@ -7,4 +7,9 @@ export class AppController {
   getHello(@Res() res: Response) {
     return res.sendFile(`${process.cwd()}/src/pictures/nono.html`);
   }
+
+  @Get('up')
+  getUp(@Res() res: Response) {
+    return res.json({ status: 'up' });
+  }
 }
