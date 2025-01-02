@@ -101,12 +101,12 @@ export class AppModule implements NestModule {
       method: RequestMethod.POST,
     });
 
-    consumer
-      .apply(APIMiddleware)
-      .exclude(
-        { path: 'notification/send', method: RequestMethod.POST },
-        { path: 'notification/create_api_key', method: RequestMethod.POST },
-      )
-      .forRoutes('notification');
+    // consumer
+    //   .apply(APIMiddleware)
+    //   .exclude(
+    //     { path: 'notification/send', method: RequestMethod.POST },
+    //     { path: 'notification/create_api_key', method: RequestMethod.POST },
+    //   )
+    //   .forRoutes('notification');
   }
 }
