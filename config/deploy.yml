@@ -37,7 +37,7 @@ builder:
   arch: amd64
   secrets:
     - FCM_CERT
-    - JWT_PUBLIC_KEY
+    - JWT_PRIVATE_KEY
     - JWT_PUBLIC_KEY
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 #
