@@ -31,8 +31,8 @@ COPY --from=builder /app/src ./src
 
 RUN touch .env
 
+# For Firebase Cloud Messaging to work
 RUN mkdir ./src/certs
-
 RUN --mount=type=secret,id=FCM_CERT \
     cat /run/secrets/FCM_CERT > ./src/certs/fcm-cert.json
 
