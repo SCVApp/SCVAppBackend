@@ -38,4 +38,6 @@ RUN --mount=type=secret,id=FCM_CERT \
 
 EXPOSE 5050
 
+ENV NODE_ENV=production
+
 CMD ["node" , "dist/main.js"]
