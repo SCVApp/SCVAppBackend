@@ -40,6 +40,7 @@ builder:
 env:
   clear:
     NODE_ENV: production
+    PORT: 5050
   secret:
     - DB_HOST
     - DB_PORT

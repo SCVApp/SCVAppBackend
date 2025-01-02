@@ -19,7 +19,6 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
-  
   await app.listen(env.PORT || 5050);
 }
 bootstrap();
