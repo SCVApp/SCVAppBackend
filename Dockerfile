@@ -31,6 +31,8 @@ COPY --from=builder /app/src ./src
 
 RUN touch .env
 
+RUN mkdir ./src/certs
+
 RUN --mount=type=secret,id=FCM_CERT \
     cat /run/secrets/FCM_CERT > ./src/certs/fcm-cert.json
 
