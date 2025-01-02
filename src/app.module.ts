@@ -18,7 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassModule } from './pass/pass.module';
 import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
 import { ConfigModule } from '@nestjs/config';
-// import { NotificationModule } from './notification/notification.module';
+import { NotificationModule } from './notification/notification.module';
 import configuration from './common/configuration';
 import { APIMiddleware } from './notification/middleware/api.middleware';
 
@@ -48,7 +48,7 @@ dotenv.config();
       load: [configuration],
       isGlobal: true,
     }),
-    // NotificationModule,
+    NotificationModule,
   ],
   controllers: [AppController],
 })
@@ -101,12 +101,12 @@ export class AppModule implements NestModule {
       method: RequestMethod.POST,
     });
 
-    // consumer
-    //   .apply(APIMiddleware)
-    //   .exclude(
-    //     { path: 'notification/send', method: RequestMethod.POST },
-    //     { path: 'notification/create_api_key', method: RequestMethod.POST },
-    //   )
-    //   .forRoutes('notification');
+    consumer
+      .apply(APIMiddleware)
+      .exclude(
+        { path: 'notification/send', method: RequestMethod.POST },
+        { path: 'notification/create_api_key', method: RequestMethod.POST },
+      )
+      .forRoutes('notification');
   }
 }
