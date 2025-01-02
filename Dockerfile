@@ -28,6 +28,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src ./src
 
 # COPY --from=builder /app/.env.production ./.env
+RUN touch .env
 
 EXPOSE 5050
 
