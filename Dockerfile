@@ -28,7 +28,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src ./src
 
 # COPY --from=builder /app/.env.production ./.env
-COPY --from=builder /app/src/certs/scvapp-704a1-firebase-adminsdk-ao353-c43acd203a.json ./src/certs/scvapp-704a1-firebase-adminsdk-ao353-c43acd203a.json
 
 RUN touch .env
 

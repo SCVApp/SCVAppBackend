@@ -18,7 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassModule } from './pass/pass.module';
 import { DoorPassMiddleware } from './pass/middleware/doorPass.middleware';
 import { ConfigModule } from '@nestjs/config';
-import { NotificationModule } from './notification/notification.module';
+// import { NotificationModule } from './notification/notification.module';
 import configuration from './common/configuration';
 import { APIMiddleware } from './notification/middleware/api.middleware';
 
@@ -48,7 +48,7 @@ dotenv.config();
       load: [configuration],
       isGlobal: true,
     }),
-    NotificationModule,
+    // NotificationModule,
   ],
   controllers: [AppController],
 })
