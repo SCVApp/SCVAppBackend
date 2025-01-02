@@ -24,7 +24,7 @@ proxy:
   app_port: 5050
   forward_headers: true
   healthcheck:
-    start_period: 30s
+    log_lines: 100
 # Credentials for your image host.
 registry:
   # Specify the registry server, if you're not using Docker Hub
