@@ -31,6 +31,9 @@ COPY --from=builder /app/src ./src
 
 RUN touch .env
 
+RUN --mount=type=secret,id=FCM_CERT \
+    cat /run/secrets/FCM_CERT > ./src/certs/fcm-cert.json
+
 EXPOSE 5050
 
 CMD ["node" , "dist/main.js"]

@@ -15,9 +15,7 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class NotificationService {
-  private readonly FCM = new fcm(
-    './src/certs/scvapp-704a1-firebase-adminsdk-ao353-c43acd203a.json',
-  );
+  private readonly FCM = new fcm('./src/certs/fcm-cert.json');
   private readonly logger = new Logger(NotificationService.name);
   constructor(
     @InjectRepository(DeviceEntity)
