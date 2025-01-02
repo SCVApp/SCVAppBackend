@@ -14,7 +14,7 @@ export class AuthService {
       state: state, //Funkciji za generiranje vnesemo podatek, ki ga bomo potrebovali kasneje
       prompt: 'select_account', //Funkciji za generiranje vnesemo ta podatek, da si lahko uporabnik zmeraj izbere profil
     };
-    let url = await clientApplication.getAuthCodeUrl(authCodeUrlParameters); // Generiranje URL-ja za preusmeritev na prijavno stran
+    const url = await clientApplication.getAuthCodeUrl(authCodeUrlParameters); // Generiranje URL-ja za preusmeritev na prijavno stran
     return { url: url }; //tukaj poslemo generirani URL nazaj
   }
 
