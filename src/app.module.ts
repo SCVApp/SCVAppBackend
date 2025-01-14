@@ -21,6 +21,7 @@ import { ConfigModule } from '@nestjs/config';
 import { NotificationModule } from './notification/notification.module';
 import configuration from './common/configuration';
 import { APIMiddleware } from './notification/middleware/api.middleware';
+import { LockersModule } from './lockers/lockers.module';
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ dotenv.config();
       isGlobal: true,
     }),
     NotificationModule,
+    LockersModule,
   ],
   controllers: [AppController],
 })
