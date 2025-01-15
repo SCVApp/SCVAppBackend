@@ -80,6 +80,14 @@ export class AppModule implements NestModule {
           path: 'auth/logout',
           method: RequestMethod.POST,
         },
+        {
+          path: 'lockers/open',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'lockers/end',
+          method: RequestMethod.POST,
+        },
       );
     consumer
       .apply(AdminMiddleware)

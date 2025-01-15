@@ -58,7 +58,7 @@ export class PassService {
         return null;
       }
     }
-    let user = await this.userPassRepository.findOne({
+    const user = await this.userPassRepository.findOne({
       where: { azure_id: azureId === '' ? userFromAzure.id : azureId },
     });
     if (user) {

@@ -35,7 +35,7 @@ export class AuthController {
   @Redirect('/', 302)
   getAuthUrl(@Headers() headers) {
     //Funkcija za preusmeritev na prijavni url
-    let referer = headers.referer;
+    const referer = headers.referer;
     let name = 'app';
     switch (
       referer // Preverjanje iz katere platforme se želi uporabnik prijaviti v aplikacijo(za kasnejše potreba)
@@ -56,22 +56,21 @@ export class AuthController {
         name = 'testnaappscv';
         break;
     }
-    let state = `${name}`;
+    const state = `${name}`;
 
     return this.authServices.getAuthUrl(state);
   }
 
-  @Get('redirect')
+  @Get('/redirect/')
   async redirect(@Query() query, @Res() res: Response) {
     // Funkcija za preusmeritev iz Microsofta po prijavi
     try {
-      let code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
-      let state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil
+      const code = query.code || ''; //Koda za dostop do dostopnega žetona,... od uporabnika
+      const state = query.state || ''; //Oznaka za platforme iz katere se je uporabnik prijavil
       if (code === '') {
         //Preverimo če je koda prazna
         throw new BadRequestException();
       }
-
       const token = await this.authServices.getToken(code);
       if (token) {
         await this.tokenService.saveToken(token, res);
@@ -86,6 +85,7 @@ export class AuthController {
         return res.redirect('https://testna.app.scv.si/?success=signin');
       }
       const signToken = await this.tokenService.signToken(token);
+
       return res.redirect(
         `scvapp://app.scv.si/mobileapp?accessToken=${
           signToken.accessToken

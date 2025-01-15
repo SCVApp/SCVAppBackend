@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Column,
+  JoinColumn,
+} from 'typeorm';
 import { LockerControllerEntity } from './lockerController.entity';
 @Entity('lockers')
 export class LockerEntity {
@@ -6,6 +12,7 @@ export class LockerEntity {
   id: number;
 
   @ManyToOne((type) => LockerControllerEntity, { eager: true })
+  @JoinColumn({ name: 'controller_id' })
   controller: LockerControllerEntity;
 
   @Column({ type: 'varchar', length: 5 })
