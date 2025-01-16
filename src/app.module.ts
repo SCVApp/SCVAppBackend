@@ -88,6 +88,14 @@ export class AppModule implements NestModule {
           path: 'lockers/end',
           method: RequestMethod.POST,
         },
+        {
+          path: 'lockers/controllers',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'lockers/my',
+          method: RequestMethod.GET,
+        },
       );
     consumer
       .apply(AdminMiddleware)

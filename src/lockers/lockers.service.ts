@@ -76,6 +76,17 @@ export class LockersService {
     return await this.lockerRepository.findOne({ where: { id } });
   }
 
+  async getUserLocker(userAzureId: string, userAccessToken: string) {
+    const user: UserPassEntity = await this.passService.getUserFromAzureId(
+      userAzureId,
+      userAccessToken,
+    );
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return await this.getUsersActiveLocker(user);
+  }
+
   async getUsersActiveLocker(
     user: UserPassEntity,
   ): Promise<LockerEntity | null> {
@@ -97,7 +108,11 @@ export class LockersService {
   }
 
   // Open locker or assign locker to
-  async openOrAssignLocker(userAzureId: string, userAccessToken: string) {
+  async openOrAssignLocker(
+    userAzureId: string,
+    userAccessToken: string,
+    controllerId: number,
+  ) {
     const user: UserPassEntity = await this.passService.getUserFromAzureId(
       userAzureId,
       userAccessToken,
@@ -113,7 +128,9 @@ export class LockersService {
       }
       return;
     }
-    const firstAvailableLocker = await this.getFirstAvailableLocker(1);
+    const firstAvailableLocker = await this.getFirstAvailableLocker(
+      controllerId,
+    );
     if (!firstAvailableLocker) {
       throw new NotFoundException('No lockers available');
     }
