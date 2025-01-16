@@ -1,10 +1,18 @@
-import { Controller, Post, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LockersService } from './lockers.service';
 
 @Controller('lockers')
 export class LockersController {
   constructor(private readonly lockersService: LockersService) {}
+
+  @Get('controllers')
+  async getControllers(@Res() res: Response) {
+    const controllers =
+      await this.lockersService.getControllersWithAvailableLockers();
+
+    return res.status(200).json(controllers);
+  }
 
   /*
   User requests to open locker if user currently does not have a locker it will be assigned to him if locker is available

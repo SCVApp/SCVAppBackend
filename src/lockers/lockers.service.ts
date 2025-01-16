@@ -15,6 +15,7 @@ import { LockersUsersEntity } from './entities/lockersUsers.entity';
 import { JwtService } from '@nestjs/jwt';
 import { PassService } from 'src/pass/service/pass.service';
 import { UserPassEntity } from 'src/pass/entities/passUser.entity';
+import { ControllerWithActiveLockerCount } from './types/controllerWithActiveLockerCount.type';
 
 @Injectable()
 export class LockersService {
@@ -32,6 +33,36 @@ export class LockersService {
     @Inject(forwardRef(() => PassService))
     private readonly passService: PassService,
   ) {}
+
+  async getControllersWithAvailableLockers(): Promise<
+    ControllerWithActiveLockerCount[]
+  > {
+    const controllerData = await this.lockerControllerRepository
+      .createQueryBuilder('lc')
+      .leftJoin(
+        'lockers',
+        'l',
+        `l.controller_id = lc.id AND l.id NOT IN (
+          SELECT lu.locker_id
+          FROM lockers_users lu
+          WHERE lu.end_time IS NULL OR lu.end_time > NOW()
+        )`,
+      )
+      .select('lc.id', 'controllerId')
+      .addSelect('lc.name', 'controllerName')
+      .addSelect('COUNT(DISTINCT l.id)', 'count')
+      .groupBy('lc.id')
+      .getRawMany();
+
+    return controllerData.map((data) => {
+      const obj: ControllerWithActiveLockerCount = {
+        id: data.controllerId,
+        name: data.controllerName,
+        freeLockers: parseInt(data.count || 0),
+      };
+      return obj;
+    });
+  }
 
   async getLockerControllerByToken(
     token: string,
@@ -65,6 +96,7 @@ export class LockersService {
     return await this.getLockerById(locker.locker_id);
   }
 
+  // Open locker or assign locker to
   async openOrAssignLocker(userAzureId: string, userAccessToken: string) {
     const user: UserPassEntity = await this.passService.getUserFromAzureId(
       userAzureId,
@@ -96,6 +128,7 @@ export class LockersService {
     return { success: true };
   }
 
+  // End locker session
   async endLocker(userAzureId: string, userAccessToken: string) {
     const user: UserPassEntity = await this.passService.getUserFromAzureId(
       userAzureId,
