@@ -16,6 +16,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PassService } from 'src/pass/service/pass.service';
 import { UserPassEntity } from 'src/pass/entities/passUser.entity';
 import { ControllerWithActiveLockerCount } from './types/controllerWithActiveLockerCount.type';
+import { LockerWithActiveUser } from './types/lockerWithActiveUser.type';
+import { isNull } from 'util';
 
 @Injectable()
 export class LockersService {
@@ -209,6 +211,50 @@ export class LockersService {
       locker.controller.id.toString(),
       jwtToken,
     );
+  }
+
+  async getLockersByControllerId(
+    cotrollerId: number,
+  ): Promise<LockerWithActiveUser[]> {
+    const lockersData = await this.lockerRepository
+      .createQueryBuilder('lockers')
+      .leftJoinAndSelect(
+        'lockers_users',
+        'lockers_users',
+        `lockers.id = lockers_users.locker_id
+         AND lockers_users.start_time < NOW()
+         AND (lockers_users.end_time > NOW() OR lockers_users.end_time IS NULL)`,
+      )
+      .leftJoinAndSelect(
+        'user_passes',
+        'user_passes',
+        'lockers_users.user_id = user_passes.id',
+      )
+      .where('lockers.controller_id = :controller_id', {
+        controller_id: cotrollerId,
+      })
+      .select('lockers.id', 'lockerId')
+      .addSelect('lockers.identifier', 'identifier')
+      .addSelect('lockers_users.start_time', 'startTime')
+      .addSelect('lockers_users.end_time', 'endTime')
+      .addSelect('user_passes.azure_id', 'azureId')
+      .getRawMany();
+
+    return lockersData.map((data) => {
+      const obj: LockerWithActiveUser = {
+        id: data.lockerId,
+        identifier: data.identifier,
+        current_user:
+          data.azureId === null
+            ? null
+            : {
+                azure_id: data.azureId,
+                start_time: data.startTime,
+                end_time: data.endTime,
+              },
+      };
+      return obj;
+    });
   }
 
   async signJwtToken(controllerToken: string, lockerId: string) {

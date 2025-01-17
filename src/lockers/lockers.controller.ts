@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OpenLockerDto } from './dto/openLocker.dto';
 import { LockersService } from './lockers.service';
@@ -17,6 +26,9 @@ export class LockersController {
     return res.status(200).json(controllers);
   }
 
+  /*
+  Get locker reserved by user
+  */
   @Get('my')
   async getUserLocker(@Req() req: Request, @Res() res: Response) {
     const userAzureId: string = req.body.azure_id;
@@ -30,6 +42,20 @@ export class LockersController {
     } else {
       return res.status(404).json({ message: 'Locker not found' });
     }
+  }
+
+  /*
+  Get all lockers by controller id
+  */
+  @Get(':controllerId')
+  async getLockersByControllerId(
+    @Param('controllerId', ParseIntPipe) controllerId: number,
+    @Res() res: Response,
+  ) {
+    const lockers = await this.lockersService.getLockersByControllerId(
+      controllerId,
+    );
+    return res.status(200).json(lockers);
   }
 
   /*
