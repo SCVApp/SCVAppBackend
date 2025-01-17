@@ -112,7 +112,23 @@ export class AppModule implements NestModule {
           method: RequestMethod.POST,
         },
       )
-      .forRoutes('admin', 'pass', 'notification');
+      .forRoutes(
+        'admin',
+        'pass',
+        'notification',
+        {
+          path: 'lockers/controller/:controllerId',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'lockers/open/:lockerId',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'lockers/end/:lockerId',
+          method: RequestMethod.POST,
+        },
+      );
 
     consumer.apply(DoorPassMiddleware).forRoutes('pass/door/is_opened', {
       path: 'user/schedule',

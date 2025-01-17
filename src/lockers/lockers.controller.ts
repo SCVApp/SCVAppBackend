@@ -47,7 +47,7 @@ export class LockersController {
   /*
   Get all lockers by controller id
   */
-  @Get(':controllerId')
+  @Get('controller/:controllerId')
   async getLockersByControllerId(
     @Param('controllerId', ParseIntPipe) controllerId: number,
     @Res() res: Response,
@@ -85,6 +85,30 @@ export class LockersController {
 
     await this.lockersService.endLocker(userAzureId, userAccessToken);
 
+    return res.status(200).json({ message: 'Locker session ended' });
+  }
+
+  /*
+  Open locker by id for Admin
+  */
+  @Post('open/:lockerId')
+  async openLockerById(
+    @Param('lockerId', ParseIntPipe) lockerId: number,
+    @Res() res: Response,
+  ) {
+    await this.lockersService.openLockerById(lockerId);
+    return res.status(200).json({ message: 'Locker opened' });
+  }
+
+  /*
+  End locker session by id for Admin
+  */
+  @Post('end/:lockerId')
+  async endLockerById(
+    @Param('lockerId', ParseIntPipe) lockerId: number,
+    @Res() res: Response,
+  ) {
+    await this.lockersService.endLockerById(lockerId);
     return res.status(200).json({ message: 'Locker session ended' });
   }
 }

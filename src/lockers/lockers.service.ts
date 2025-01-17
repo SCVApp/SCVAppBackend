@@ -17,7 +17,6 @@ import { PassService } from 'src/pass/service/pass.service';
 import { UserPassEntity } from 'src/pass/entities/passUser.entity';
 import { ControllerWithActiveLockerCount } from './types/controllerWithActiveLockerCount.type';
 import { LockerWithActiveUser } from './types/lockerWithActiveUser.type';
-import { isNull } from 'util';
 
 @Injectable()
 export class LockersService {
@@ -210,6 +209,36 @@ export class LockersService {
     return await this.lockersGateway.openLocker(
       locker.controller.id.toString(),
       jwtToken,
+    );
+  }
+
+  async openLockerById(lockerId: number): Promise<void> {
+    const locker = await this.getLockerById(lockerId);
+    if (!locker) {
+      throw new NotFoundException('Locker not found');
+    }
+    const success = await this.openLocker(locker);
+    if (!success) {
+      throw new InternalServerErrorException('Failed to open locker');
+    }
+  }
+
+  async endLockerById(lockerId: number): Promise<void> {
+    const locker = await this.getLockerById(lockerId);
+    if (!locker) {
+      throw new NotFoundException('Locker not found');
+    }
+    const success = await this.openLocker(locker);
+    if (!success) {
+      throw new InternalServerErrorException('Failed to open locker');
+    }
+    await this.lockersUsersRepository.update(
+      {
+        locker,
+      },
+      {
+        end_time: new Date(),
+      },
     );
   }
 
