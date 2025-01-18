@@ -47,9 +47,9 @@ jobs:
             "ghcr.io/scvapp/scvappbackend:${{ steps.tag.outputs.tag }}"
           cache-from: type=gha
           secrets: |
-            "JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}"
-            "JWT_PUBLIC_KEY: ${{ vars.JWT_PUBLIC_KEY }}""
-            "FCM_CERT: ${{ secrets.FCM_CERT }}"
+            JWT_PRIVATE_KEY=${{ secrets.JWT_PRIVATE_KEY }}
+            JWT_PUBLIC_KEY=${{ vars.JWT_PUBLIC_KEY }}
+            FCM_CERT=${{ secrets.FCM_CERT }}
           cache-to: type=gha,mode=max
         env:
           NODE_ENV: production
