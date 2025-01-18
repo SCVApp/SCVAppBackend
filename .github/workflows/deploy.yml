@@ -53,9 +53,12 @@ jobs:
           cache-to: type=gha,mode=max
         env:
           NODE_ENV: production
-          JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
-          JWT_PUBLIC_KEY: ${{ vars.JWT_PUBLIC_KEY }}
-          FCM_CERT: ${{ secrets.FCM_CERT }}
+          JWT_PRIVATE_KEY: |
+            ${{ secrets.JWT_PRIVATE_KEY }}
+          JWT_PUBLIC_KEY: |
+            ${{ vars.JWT_PUBLIC_KEY }}
+          FCM_CERT: |
+            ${{ secrets.FCM_CERT }}
 
       - name: Set up SSH connection
         run: |
