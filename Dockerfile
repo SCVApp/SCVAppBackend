@@ -33,13 +33,10 @@ RUN touch .env
 
 # For Firebase Cloud Messaging to work
 RUN mkdir ./src/certs
-RUN --mount=type=secret,id=FCM_CERT \
-    cat /run/secrets/FCM_CERT > ./src/certs/fcm-cert.json
+RUN $FCM_CERT > ./src/certs/fcm-cert.json
 #For public and private key to work
-RUN --mount=type=secret,id=JWT_PRIVATE_KEY \
-    cat /run/secrets/JWT_PRIVATE_KEY > ./src/certs/jwtRS256.key
-RUN --mount=type=secret,id=JWT_PUBLIC_KEY \
-    cat /run/secrets/JWT_PUBLIC_KEY > ./src/certs/jwtRS256.key.pub
+RUN $JWT_PRIVATE_KEY > ./src/certs/jwtRS256.key
+RUN $JWT_PUBLIC_KEY > ./src/certs/jwtRS256.key.pub
 
 EXPOSE 5050
 
