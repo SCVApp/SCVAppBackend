@@ -51,12 +51,13 @@ jobs:
           JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
           JWT_PUBLIC_KEY: ${{ vars.JWT_PUBLIC_KEY }}
           FCM_CERT: ${{ secrets.FCM_CERT }}
+          NODE_ENV: production
 
       - name: Set up SSH connection
         run: |
           mkdir -p ~/.ssh && echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
           eval $(ssh-agent -s) && ssh-add ~/.ssh/id_rsa
-          ssh-keyscan -p 22 194.249.251.27 >> ~/.ssh/known_hosts
+          ssh-keyscan -p 22 194.249.251.14 >> ~/.ssh/known_hosts
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }}
 
@@ -83,3 +84,4 @@ jobs:
           OAUTH_SCOPES: ${{ vars.OAUTH_SCOPES }}
           OAUTH_REDIRECT_URI: ${{ vars.OAUTH_REDIRECT_URI }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_ENV: production
