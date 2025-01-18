@@ -31,12 +31,16 @@ COPY --from=builder /app/src ./src
 
 RUN touch .env
 
+ARG FCM_CERT
+ARG JWT_PRIVATE_KEY
+ARG JWT_PUBLIC_KEY
+
 # For Firebase Cloud Messaging to work
 RUN mkdir ./src/certs
-RUN echo -e "$FCM_CERT" > ./src/certs/fcm-cert.json
+RUN echo -e "$FCM_CERT" | base64 -d > ./src/certs/fcm-cert.json
 #For public and private key to work
-RUN echo -e "$JWT_PRIVATE_KEY" > ./src/certs/jwtRS256.key
-RUN echo -e "$JWT_PUBLIC_KEY" > ./src/certs/jwtRS256.key.pub
+RUN echo -e "$JWT_PRIVATE_KEY" | base64 -d > ./src/certs/jwtRS256.key
+RUN echo -e "$JWT_PUBLIC_KEY" | base64 -d > ./src/certs/jwtRS256.key.pub
 #
 
 EXPOSE 5050
