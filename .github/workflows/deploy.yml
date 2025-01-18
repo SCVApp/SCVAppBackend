@@ -51,14 +51,12 @@ jobs:
             "ghcr.io/scvapp/scvappbackend:${{ steps.tag.outputs.tag }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            JWT_PRIVATE_KEY=${{ secrets.JWT_PRIVATE_KEY }}
+            JWT_PUBLIC_KEY=${{ vars.JWT_PUBLIC_KEY }}
+            FCM_CERT=${{ secrets.FCM_CERT }}
         env:
           NODE_ENV: production
-          JWT_PRIVATE_KEY: |
-            ${{ secrets.JWT_PRIVATE_KEY }}
-          JWT_PUBLIC_KEY: |
-            ${{ vars.JWT_PUBLIC_KEY }}
-          FCM_CERT: |
-            ${{ secrets.FCM_CERT }}
 
       - name: Set up SSH connection
         run: |
