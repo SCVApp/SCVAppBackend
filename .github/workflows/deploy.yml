@@ -1,0 +1,85 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      DOCKER_BUILDKIT: 1
+      RAILS_ENV: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: urbankrepel
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Tag
+        id: tag
+        run: |
+          echo "tag=$(git rev-parse "$GITHUB_SHA")" >> $GITHUB_OUTPUT
+
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          labels: |
+            "service=scvapp"
+          tags: |
+            "ghcr.io/scvapp/scvappbackend:latest"
+            "ghcr.io/scvapp/scvappbackend:${{ steps.tag.outputs.tag }}"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        env:
+          JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
+          JWT_PUBLIC_KEY: ${{ vars.JWT_PUBLIC_KEY }}
+          FCM_CERT: ${{ secrets.FCM_CERT }}
+
+      - name: Set up SSH connection
+        run: |
+          mkdir -p ~/.ssh && echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+          eval $(ssh-agent -s) && ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -p 22 194.249.251.27 >> ~/.ssh/known_hosts
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.1'
+
+      - name: Install Kamal Gem
+        run: gem install kamal -v 2.4.0
+
+      - name: Deploy command
+        run: kamal deploy --skip-push
+        env:
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_USERNAME: ${{ vars.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          OAUTH_OBJECT_ID: ${{ vars.OAUTH_OBJECT_ID }}
+          OAUTH_APP_ID: ${{ vars.OAUTH_APP_ID }}
+          OAUTH_AUTHORITY: ${{ vars.OAUTH_AUTHORITY }}
+          OAUTH_APP_CLIENT_SECRET: ${{ secrets.OAUTH_APP_CLIENT_SECRET }}
+          OAUTH_SCOPES: ${{ vars.OAUTH_SCOPES }}
+          OAUTH_REDIRECT_URI: ${{ vars.OAUTH_REDIRECT_URI }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
