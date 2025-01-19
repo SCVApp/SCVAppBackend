@@ -154,6 +154,10 @@ export class LockersService {
     }
     const success = await this.openLocker(assignedLocker);
     if (!success) {
+      await this.lockersUsersRepository.delete({
+        user,
+        locker: assignedLocker,
+      });
       throw new InternalServerErrorException('Failed to open locker');
     }
     return { success: true };
