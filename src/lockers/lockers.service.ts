@@ -135,14 +135,31 @@ export class LockersService {
     if (!firstAvailableLocker) {
       throw new NotFoundException('No lockers available');
     }
-    const success = await this.openLocker(firstAvailableLocker);
+
+    // This is the check from db, becouse we have a trigger on lockers_users table and if we insert already used locker, it will change the locker with the first available one
+    const result = await this.lockersUsersRepository
+      .insert({
+        user,
+        locker: firstAvailableLocker,
+      })
+      .catch(() => {
+        throw new InternalServerErrorException('No lockers available');
+      });
+    if (!result) {
+      throw new NotFoundException('No lockers available');
+    }
+    const assignedLocker = await this.getUsersActiveLocker(user);
+    if (!assignedLocker) {
+      throw new NotFoundException('No lockers available');
+    }
+    const success = await this.openLocker(assignedLocker);
     if (!success) {
+      await this.lockersUsersRepository.delete({
+        user,
+        locker: assignedLocker,
+      });
       throw new InternalServerErrorException('Failed to open locker');
     }
-    await this.lockersUsersRepository.save({
-      user,
-      locker: firstAvailableLocker,
-    });
     return { success: true };
   }
 
