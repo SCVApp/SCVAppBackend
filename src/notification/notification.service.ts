@@ -12,6 +12,7 @@ import { DeviceEntity } from './entities/device.entity';
 import { PassService } from 'src/pass/service/pass.service';
 import { ApiKeyEntity } from './entities/apiKey.entity';
 import * as crypto from 'crypto';
+import { UserPassEntity } from 'src/pass/entities/passUser.entity';
 
 @Injectable()
 export class NotificationService {
@@ -178,5 +179,30 @@ export class NotificationService {
 
   async findApiKey(key: string) {
     return this.apiKeyRepository.findOne({ where: { key } });
+  }
+
+  async sendToUser(user: UserPassEntity, title: string, body: string) {
+    const devices = await this.deviceRepository.find({ where: { user } });
+    const tokens = devices.map((device) => device.notification_token);
+    for (const token of tokens) {
+      this.FCM.send(
+        {
+          notification: {
+            title,
+            body,
+          },
+          token,
+        },
+        (err, response) => {
+          if (err) {
+            this.logger.error('Notification sending failed');
+            this.logger.error(err);
+          } else {
+            this.logger.log('Notification sent');
+            this.logger.log(response);
+          }
+        },
+      );
+    }
   }
 }

@@ -17,6 +17,7 @@ import { PassService } from 'src/pass/service/pass.service';
 import { UserPassEntity } from 'src/pass/entities/passUser.entity';
 import { ControllerWithActiveLockerCount } from './types/controllerWithActiveLockerCount.type';
 import { LockerWithActiveUser } from './types/lockerWithActiveUser.type';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class LockersService {
@@ -33,6 +34,8 @@ export class LockersService {
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => PassService))
     private readonly passService: PassService,
+    @Inject(forwardRef(() => NotificationService))
+    private readonly notificationService: NotificationService,
   ) {}
 
   async getControllersWithAvailableLockers(): Promise<
@@ -223,10 +226,11 @@ export class LockersService {
       locker.controller.token,
       locker.identifier,
     );
-    return await this.lockersGateway.openLocker(
+    const success = await this.lockersGateway.openLocker(
       locker.controller.id.toString(),
       jwtToken,
     );
+    return success;
   }
 
   async openLockerById(lockerId: number): Promise<void> {
@@ -284,6 +288,7 @@ export class LockersService {
       .addSelect('lockers_users.start_time', 'startTime')
       .addSelect('lockers_users.end_time', 'endTime')
       .addSelect('user_passes.azure_id', 'azureId')
+      .orderBy('lockers.position', 'ASC')
       .getRawMany();
 
     return lockersData.map((data) => {
