@@ -17,4 +17,7 @@ export class LockerEntity {
 
   @Column({ type: 'varchar', length: 5 })
   identifier: string;
+
+  @Column({ type: 'int', default: 0 })
+  position: number;
 }
