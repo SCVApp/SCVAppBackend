@@ -96,6 +96,10 @@ export class AppModule implements NestModule {
           path: 'lockers/my',
           method: RequestMethod.GET,
         },
+        {
+          path: 'lockers/controller/:controllerId',
+          method: RequestMethod.GET,
+        },
       );
     consumer
       .apply(AdminMiddleware)
@@ -117,7 +121,7 @@ export class AppModule implements NestModule {
         'pass',
         'notification',
         {
-          path: 'lockers/controller/:controllerId',
+          path: 'lockers/controller/:controllerId/admin',
           method: RequestMethod.GET,
         },
         {
