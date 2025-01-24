@@ -18,6 +18,7 @@ import { UserPassEntity } from 'src/pass/entities/passUser.entity';
 import { ControllerWithActiveLockerCount } from './types/controllerWithActiveLockerCount.type';
 import { LockerWithActiveUser } from './types/lockerWithActiveUser.type';
 import { NotificationService } from 'src/notification/notification.service';
+import { LockerWithStatus } from './types/lockerWithStatus.type';
 
 @Injectable()
 export class LockersService {
@@ -115,7 +116,7 @@ export class LockersService {
   async openOrAssignLocker(
     userAzureId: string,
     userAccessToken: string,
-    controllerId: number,
+    lockerId: number,
   ) {
     const user: UserPassEntity = await this.passService.getUserFromAzureId(
       userAzureId,
@@ -132,34 +133,29 @@ export class LockersService {
       }
       return;
     }
-    const firstAvailableLocker = await this.getFirstAvailableLocker(
-      controllerId,
-    );
-    if (!firstAvailableLocker) {
-      throw new NotFoundException('No lockers available');
+    const selectedLocker = await this.getLockerById(lockerId);
+    if (!selectedLocker) {
+      throw new NotFoundException('Locker not found');
     }
 
-    // This is the check from db, becouse we have a trigger on lockers_users table and if we insert already used locker, it will change the locker with the first available one
+    // This is the check from db, becouse we have a trigger on lockers_users table and if we insert already used locker
     const result = await this.lockersUsersRepository
       .insert({
         user,
-        locker: firstAvailableLocker,
+        locker: selectedLocker,
       })
       .catch(() => {
-        throw new InternalServerErrorException('No lockers available');
+        throw new NotFoundException('This locker is already in use');
       });
     if (!result) {
-      throw new NotFoundException('No lockers available');
+      throw new NotFoundException('This locker is already in use');
     }
-    const assignedLocker = await this.getUsersActiveLocker(user);
-    if (!assignedLocker) {
-      throw new NotFoundException('No lockers available');
-    }
-    const success = await this.openLocker(assignedLocker);
+
+    const success = await this.openLocker(selectedLocker);
     if (!success) {
       await this.lockersUsersRepository.delete({
         user,
-        locker: assignedLocker,
+        locker: selectedLocker,
       });
       throw new InternalServerErrorException('Failed to open locker');
     }
@@ -303,6 +299,37 @@ export class LockersService {
                 start_time: data.startTime,
                 end_time: data.endTime,
               },
+      };
+      return obj;
+    });
+  }
+
+  async getLockersByControllerIdWithStatus(
+    cotrollerId: number,
+  ): Promise<LockerWithStatus[]> {
+    const lockersData = await this.lockerRepository
+      .createQueryBuilder('lockers')
+      .leftJoinAndSelect(
+        'lockers_users',
+        'lockers_users',
+        `lockers.id = lockers_users.locker_id
+         AND lockers_users.start_time < NOW()
+         AND (lockers_users.end_time > NOW() OR lockers_users.end_time IS NULL)`,
+      )
+      .where('lockers.controller_id = :controller_id', {
+        controller_id: cotrollerId,
+      })
+      .select('lockers.id', 'lockerId')
+      .addSelect('lockers.identifier', 'identifier')
+      .addSelect('lockers_users.user_id', 'userId')
+      .orderBy('lockers.position', 'ASC')
+      .getRawMany();
+
+    return lockersData.map((data) => {
+      const obj: LockerWithStatus = {
+        id: data.lockerId,
+        identifier: data.identifier,
+        used: data.userId !== null,
       };
       return obj;
     });

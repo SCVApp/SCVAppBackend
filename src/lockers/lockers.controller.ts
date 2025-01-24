@@ -45,16 +45,31 @@ export class LockersController {
   }
 
   /*
-  Get all lockers by controller id
+  Get all lockers by controller id for admins
   */
-  @Get('controller/:controllerId')
-  async getLockersByControllerId(
+  @Get('controller/:controllerId/admin')
+  async getLockersByControllerIdAdmin(
     @Param('controllerId', ParseIntPipe) controllerId: number,
     @Res() res: Response,
   ) {
     const lockers = await this.lockersService.getLockersByControllerId(
       controllerId,
     );
+    return res.status(200).json(lockers);
+  }
+
+  /*
+  Get all lockers by controller id for users
+  */
+  @Get('controller/:controllerId')
+  async getLockersByControllerId(
+    @Param('controllerId', ParseIntPipe) controllerId: number,
+    @Res() res: Response,
+  ) {
+    const lockers =
+      await this.lockersService.getLockersByControllerIdWithStatus(
+        controllerId,
+      );
     return res.status(200).json(lockers);
   }
 
@@ -69,7 +84,7 @@ export class LockersController {
     await this.lockersService.openOrAssignLocker(
       userAzureId,
       userAccessToken,
-      data.controllerId,
+      data.lockerId,
     );
 
     return res.status(200).json({ message: 'Locker opened' });
