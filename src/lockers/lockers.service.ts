@@ -81,7 +81,7 @@ export class LockersService {
     return await this.lockerRepository.findOne({ where: { id } });
   }
 
-  async getUserLocker(userAzureId: string, userAccessToken: string) {
+  async getUserLockers(userAzureId: string, userAccessToken: string) {
     const user: UserPassEntity = await this.passService.getUserFromAzureId(
       userAzureId,
       userAccessToken,
@@ -89,27 +89,63 @@ export class LockersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return await this.getUsersActiveLocker(user);
+    return await this.getUsersActiveLockers(user, false);
   }
 
-  async getUsersActiveLocker(
+  async getUsersActiveLockers(
     user: UserPassEntity,
-  ): Promise<LockerEntity | null> {
-    const locker = await this.lockersUsersRepository
+    countOnly: true,
+  ): Promise<number>;
+  async getUsersActiveLockers(
+    user: UserPassEntity,
+    countOnly: false,
+  ): Promise<LockerEntity[]>;
+
+  async getUsersActiveLockers(
+    user: UserPassEntity,
+    countOnly: boolean,
+  ): Promise<LockerEntity[] | number> {
+    const data = this.lockersUsersRepository
       .createQueryBuilder('lockers_users')
       .select('locker_id')
       .where('user_id = :user_id', { user_id: user.id })
       .andWhere('start_time < NOW()')
       .andWhere('(end_time > NOW() OR end_time IS NULL)')
-      .orderBy('start_time', 'DESC')
-      .limit(1)
-      .getRawOne();
+      .orderBy('start_time', 'DESC');
 
-    if (!locker || !locker.locker_id) {
-      return null;
+    if (countOnly) {
+      return await data.getCount();
     }
 
-    return await this.getLockerById(locker.locker_id);
+    const lockers = await data.getRawMany();
+    const promises = lockers.map((locker) =>
+      this.getLockerById(locker.locker_id),
+    );
+    const result = await Promise.allSettled(promises);
+
+    return result
+      .map((r) => {
+        if (r.status === 'fulfilled') {
+          return r.value;
+        }
+        return null;
+      })
+      .filter((r): r is LockerEntity => r !== null);
+  }
+
+  async isUserUsingLocker(
+    user: UserPassEntity,
+    lockerId: number,
+  ): Promise<boolean> {
+    const result: number = await this.lockersUsersRepository
+      .createQueryBuilder('lu')
+      .where('lu.user_id = :user_id', { user_id: user.id })
+      .andWhere('lu.locker_id = :locker_id', { locker_id: lockerId })
+      .andWhere('lu.start_time < NOW()')
+      .andWhere('(lu.end_time > NOW() OR lu.end_time IS NULL)')
+      .getCount();
+
+    return result > 0;
   }
 
   // Open locker or assign locker to
@@ -125,14 +161,20 @@ export class LockersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const activeLocker = await this.getUsersActiveLocker(user);
-    if (activeLocker) {
-      const success = await this.openLocker(activeLocker);
-      if (!success) {
-        throw new InternalServerErrorException('Failed to open locker');
-      }
+
+    // Check if user is already using locker
+    const isUserUsingLocker = await this.isUserUsingLocker(user, lockerId);
+    if (isUserUsingLocker) {
+      await this.openLockerById(lockerId);
       return;
     }
+
+    // Check if user lockers limit is reached
+    const userLockersCount = await this.getUsersActiveLockers(user, true);
+    if (userLockersCount >= 2) {
+      throw new NotFoundException('You have reached the limit of lockers');
+    }
+
     const selectedLocker = await this.getLockerById(lockerId);
     if (!selectedLocker) {
       throw new NotFoundException('Locker not found');
@@ -163,7 +205,11 @@ export class LockersService {
   }
 
   // End locker session
-  async endLocker(userAzureId: string, userAccessToken: string) {
+  async endLocker(
+    userAzureId: string,
+    userAccessToken: string,
+    lockerId: number,
+  ) {
     const user: UserPassEntity = await this.passService.getUserFromAzureId(
       userAzureId,
       userAccessToken,
@@ -171,10 +217,17 @@ export class LockersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const activeLocker = await this.getUsersActiveLocker(user);
-    if (!activeLocker) {
-      throw new NotFoundException('User does not have an active locker');
+
+    const isUserUsingLocker = await this.isUserUsingLocker(user, lockerId);
+    if (!isUserUsingLocker) {
+      throw new NotFoundException('User is not using this locker');
     }
+
+    const activeLocker = await this.getLockerById(lockerId);
+    if (!activeLocker) {
+      throw new NotFoundException('Locker not found');
+    }
+
     const success = await this.openLocker(activeLocker);
     if (!success) {
       throw new InternalServerErrorException('Failed to open locker');
