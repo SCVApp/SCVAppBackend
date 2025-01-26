@@ -33,7 +33,7 @@ export class LockersController {
   async getUserLocker(@Req() req: Request, @Res() res: Response) {
     const userAzureId: string = req.body.azure_id;
     const userAccessToken: string = req.body.access_token;
-    const locker = await this.lockersService.getUserLocker(
+    const locker = await this.lockersService.getUserLockers(
       userAzureId,
       userAccessToken,
     );
@@ -94,11 +94,15 @@ export class LockersController {
   User requests to end locker session if user currently has a locker assigned to him it will be opened and end the session so locker can be used by other users
   */
   @Post('end')
-  async endLocker(@Req() req: Request, @Res() res: Response) {
-    const userAzureId = req.body.azure_id;
-    const userAccessToken = req.body.access_token;
+  async endLocker(@Body() data: OpenLockerDto, @Res() res: Response) {
+    const userAzureId = data.azure_id;
+    const userAccessToken = data.access_token;
 
-    await this.lockersService.endLocker(userAzureId, userAccessToken);
+    await this.lockersService.endLocker(
+      userAzureId,
+      userAccessToken,
+      data.lockerId,
+    );
 
     return res.status(200).json({ message: 'Locker session ended' });
   }

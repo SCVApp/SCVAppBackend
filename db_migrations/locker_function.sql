@@ -7,6 +7,12 @@ BEGIN
         END IF;
     END IF;
 
+    -- Check if user has reached the maximum number of lockers
+    IF (TG_OP IN ('INSERT', 'UPDATE') AND (OLD.user_id IS NULL OR NEW.user_id != OLD.user_id OR OLD.locker_id IS NULL OR NEW.locker_id != OLD.locker_id)) THEN
+        IF (SELECT COUNT(*) FROM lockers_users WHERE user_id = NEW.user_id AND start_time < NOW() AND (end_time IS NULL OR end_time > NOW())) >= 2 THEN
+            RAISE EXCEPTION 'The user have reached the maximum number of lockers';
+        END IF;
+    END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
