@@ -131,13 +131,15 @@ export class TokenService {
     }
   }
   async signToken(token: Token): Promise<Token> {
+    // Expires In calculation
+
     const signAccessToken = await this.jwtService.signAsync(
       {
         accessToken: token.accessToken,
         user_azure_id: token.user_azure_id,
       },
       {
-        expiresIn: '70min',
+        expiresIn: this.expiresInCalculation(token.expiresOn),
       },
     );
     const signRefreshToken = await this.jwtService.signAsync(
@@ -208,5 +210,21 @@ export class TokenService {
       expiresOn: expiresIn,
       user_azure_id: null,
     };
+  }
+
+  private expiresInCalculation(expiresOn: string): string {
+    const expiresOnDate = new Date(expiresOn);
+    if (expiresOnDate) {
+      if (expiresOnDate.getTime() < new Date().getTime()) {
+        return '70min';
+      } else {
+        const expiresInSeconds = Math.floor(
+          (expiresOnDate.getTime() - new Date().getTime()) / 1000,
+        );
+
+        return `${expiresInSeconds}s`;
+      }
+    }
+    return '70min';
   }
 }
