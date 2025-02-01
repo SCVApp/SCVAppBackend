@@ -196,7 +196,7 @@ export class LockersService {
     const success = await this.openLocker(selectedLocker);
     if (!success) {
       await this.lockersUsersRepository.query(
-        `DELETE FROM lockers_users WHERE id = (SELECT id FROM lockers_users WHERE user_id = $1 AND locker_id = $2 ORDER BY start_time DESC LIMIT 1)`,
+        `DELETE FROM lockers_users WHERE id = (SELECT id FROM lockers_users WHERE user_id = $1 AND locker_id = $2 AND start_time <= NOW() AND (end_time > NOW() OR end_time IS NULL) ORDER BY start_time DESC LIMIT 1)`,
         [user.id, selectedLocker.id],
       );
       throw new InternalServerErrorException('Failed to open locker');
@@ -234,7 +234,7 @@ export class LockersService {
     }
 
     await this.lockersUsersRepository.query(
-      `UPDATE lockers_users SET end_time = NOW() WHERE id = (SELECT id FROM lockers_users WHERE user_id = $1 AND locker_id = $2 ORDER BY start_time DESC LIMIT 1)`,
+      `UPDATE lockers_users SET end_time = NOW() WHERE id = (SELECT id FROM lockers_users WHERE user_id = $1 AND locker_id = $2 AND start_time < NOW() AND (end_time > NOW() OR end_time IS NULL) ORDER BY start_time DESC LIMIT 1)`,
       [user.id, activeLocker.id],
     );
     return { success: true };
@@ -299,7 +299,7 @@ export class LockersService {
       throw new InternalServerErrorException('Failed to open locker');
     }
     await this.lockersUsersRepository.query(
-      `UPDATE lockers_users SET end_time = NOW() WHERE id = (SELECT id FROM lockers_users WHERE locker_id = $1 ORDER BY start_time DESC LIMIT 1)`,
+      `UPDATE lockers_users SET end_time = NOW() WHERE id = (SELECT id FROM lockers_users WHERE locker_id = $1 AND start_time < NOW() AND (end_time > NOW() OR end_time IS NULL) ORDER BY start_time DESC LIMIT 1)`,
       [locker.id],
     );
   }
