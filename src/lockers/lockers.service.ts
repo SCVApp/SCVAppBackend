@@ -159,6 +159,7 @@ export class LockersService {
       userAccessToken,
     );
     if (!user) {
+      this.logger.error('User not found');
       throw new NotFoundException('User not found');
     }
 

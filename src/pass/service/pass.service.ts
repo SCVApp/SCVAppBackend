@@ -47,39 +47,30 @@ export class PassService {
     private readonly passGateway: PassGateway,
   ) {}
   private openDoor: string[] = [];
-  async getUserFromAzureId(azureId: string = '', accessToken: string) {
+  async getUserFromAzureId(azureId: string, accessToken: string) {
     if (accessToken === '') {
       throw new UnauthorizedException("accessToken can't be empty");
     }
-    let userFromAzure = undefined;
-    if (azureId === '') {
-      userFromAzure = await this.userService.getMe(accessToken);
-      if (!userFromAzure || !userFromAzure.id) {
+    if (!azureId || azureId === '') {
+      const userFromAzure = await this.userService.getMe(accessToken);
+      if (!userFromAzure || !userFromAzure.id || userFromAzure.id === '') {
         return null;
       }
+      azureId = userFromAzure.id;
     }
     const user = await this.userPassRepository.findOne({
-      where: { azure_id: azureId === '' ? userFromAzure.id : azureId },
+      where: { azure_id: azureId },
     });
     if (user) {
       return user;
     }
     try {
-      if (azureId !== '') {
-        userFromAzure = await this.searchService.searchSpecificUser(
-          accessToken,
-          azureId,
-        );
-      }
-      if (!userFromAzure && !userFromAzure.id) {
-        return null;
-      }
-      return this.userPassRepository.save({
-        azure_id: userFromAzure.id,
+      return await this.userPassRepository.save({
+        azure_id: azureId,
       });
     } catch (e) {
       return await this.userPassRepository.findOne({
-        where: { azure_id: azureId === '' ? userFromAzure.id : azureId },
+        where: { azure_id: azureId },
       });
     }
   }
