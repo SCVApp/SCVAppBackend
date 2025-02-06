@@ -99,14 +99,14 @@ export class NotificationService {
     azure_id: string,
     device_id: string,
     accessToken: string,
-  ) {
+  ): Promise<void> {
     const user = await this.passService.getUserFromAzureId(
       azure_id,
       accessToken,
     );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      return;
     }
 
     await this.passService.getUserAccessLevel(user, accessToken);
@@ -134,7 +134,7 @@ export class NotificationService {
     try {
       await this.deviceRepository.save(newDevice);
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error("Couldn't save device", e);
     }
   }
 
