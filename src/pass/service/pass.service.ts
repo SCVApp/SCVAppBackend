@@ -69,10 +69,12 @@ export class PassService {
         azure_id: azureId,
       });
     } catch (e) {
-      return await this.userPassRepository.findOne({
-        where: { azure_id: azureId },
-      });
+      this.logger.error("Can't save user to database", e);
     }
+
+    return await this.userPassRepository.findOne({
+      where: { azure_id: azureId },
+    });
   }
   async getUsersFromAzureId(azureId: string[], accessToken: string) {
     if (!azureId || azureId.length === 0) {
