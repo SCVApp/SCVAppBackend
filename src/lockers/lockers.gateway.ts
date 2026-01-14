@@ -27,9 +27,8 @@ export class LockersGateway {
       client.disconnect();
       return;
     }
-    const controller = await this.lockersService.getLockerControllerByToken(
-      token,
-    );
+    const controller =
+      await this.lockersService.getLockerControllerByToken(token);
     if (!controller) {
       client.disconnect();
       return;

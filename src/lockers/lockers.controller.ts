@@ -52,9 +52,8 @@ export class LockersController {
     @Param('controllerId', ParseIntPipe) controllerId: number,
     @Res() res: Response,
   ) {
-    const lockers = await this.lockersService.getLockersByControllerId(
-      controllerId,
-    );
+    const lockers =
+      await this.lockersService.getLockersByControllerId(controllerId);
     return res.status(200).json(lockers);
   }
 
