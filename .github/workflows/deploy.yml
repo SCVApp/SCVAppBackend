@@ -84,6 +84,7 @@ jobs:
           DB_NAME: ${{ vars.DB_NAME }}
           OAUTH_OBJECT_ID: ${{ vars.OAUTH_OBJECT_ID }}
           OAUTH_APP_ID: ${{ vars.OAUTH_APP_ID }}
+          OAUTH_TENANT_ID: ${{ vars.OAUTH_TENANT_ID }}
           OAUTH_AUTHORITY: ${{ vars.OAUTH_AUTHORITY }}
           OAUTH_APP_CLIENT_SECRET: ${{ secrets.OAUTH_APP_CLIENT_SECRET }}
           OAUTH_SCOPES: ${{ vars.OAUTH_SCOPES }}
