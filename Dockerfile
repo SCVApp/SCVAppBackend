@@ -14,6 +14,9 @@ COPY . .
 
 RUN npm run build
 
+# Remove dev dependencies to prepare for production
+RUN npm prune --omit=dev
+
 
 FROM node:22-alpine AS runner
 
@@ -21,7 +24,8 @@ WORKDIR /app
 
 COPY --from=builder /app/package.json /app/package-lock.json ./
 
-RUN npm ci --omit=dev
+# Copy already-built node_modules from builder (with dev deps removed)
+COPY --from=builder /app/node_modules ./node_modules
 
 COPY --from=builder /app/dist ./dist
 
