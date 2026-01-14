@@ -12,6 +12,9 @@ export class DoorPassMiddleware implements NestMiddleware {
   private readonly logger = new Logger(DoorPassMiddleware.name);
   constructor(private readonly passService: PassService) {}
   async use(req: Request, res: Response, next: () => void) {
+    // Ensure req.body exists before setting properties
+    req.body = req.body || {};
+
     try {
       const accessSecret: string = req.headers['access_secret'] as string;
       const code: string = req.headers['door_code'] as string;
