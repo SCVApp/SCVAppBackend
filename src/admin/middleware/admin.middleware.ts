@@ -17,6 +17,9 @@ export class AdminMiddleware implements NestMiddleware {
   ) {}
   async use(req: any, res: any, next: () => void) {
     //Funkcija za pridebitev osnovnih uporabnikovih podatkov
+    // Ensure req.body exists before setting properties
+    req.body = req.body || {};
+
     let authorization = await this.tokenService.verifyAuthHeader(
       req.headers.authorization,
     );
