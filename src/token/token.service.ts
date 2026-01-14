@@ -67,9 +67,19 @@ export class TokenService {
     return newtoken;
   }
 
+  private getAuthorityUrl(): string {
+    const baseAuthority =
+      env.OAUTH_AUTHORITY || 'https://login.microsoftonline.com/';
+    const tenantId = env.OAUTH_TENANT_ID;
+    const normalizedAuthority = baseAuthority.endsWith('/')
+      ? baseAuthority
+      : `${baseAuthority}/`;
+    return `${normalizedAuthority}${tenantId}/`;
+  }
+
   private async fetchToken(token: Token) {
     try {
-      let respons = await fetch(`${env.OAUTH_AUTHORITY}oauth2/v2.0/token`, {
+      let respons = await fetch(`${this.getAuthorityUrl()}oauth2/v2.0/token`, {
         body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
           env.OAUTH_APP_CLIENT_SECRET
         }&refresh_token=${token.refreshToken}&scopes='${env.OAUTH_SCOPES.split(
@@ -212,19 +222,19 @@ export class TokenService {
     };
   }
 
-  private expiresInCalculation(expiresOn: string): string {
+  private expiresInCalculation(expiresOn: string): number {
     const expiresOnDate = new Date(expiresOn);
+    const defaultExpiry = 70 * 60; // 70 minutes in seconds
     if (expiresOnDate) {
       if (expiresOnDate.getTime() < new Date().getTime()) {
-        return '70min';
+        return defaultExpiry;
       } else {
         const expiresInSeconds = Math.floor(
           (expiresOnDate.getTime() - new Date().getTime()) / 1000,
         );
-
-        return `${expiresInSeconds}s`;
+        return expiresInSeconds;
       }
     }
-    return '70min';
+    return defaultExpiry;
   }
 }
