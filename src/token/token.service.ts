@@ -90,15 +90,18 @@ export class TokenService {
         },
         method: 'post',
       });
+      this.logger.log('Status with refresh token: ' + respons.status);
       if (respons.status != 200) {
         return undefined;
       }
       const data = await respons.json();
+      this.logger.log('Data with refresh token: ' + JSON.stringify(data));
       if (data) {
         return data;
       }
       return undefined;
     } catch (e) {
+      this.logger.error('Error with refresh token: ' + e);
       return undefined;
     }
   }
