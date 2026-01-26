@@ -62,7 +62,10 @@ export class TokenService {
 
   private async fetchToken(token: Token) {
     try {
-      let respons = await fetch(`${getAuthorityUrl()}/oauth2/v2.0/token`, {
+      const tokenUrl = `${getAuthorityUrl()}/oauth2/v2.0/token`;
+      this.logger.log('Fetching token from URL: ' + tokenUrl);
+      
+      let respons = await fetch(tokenUrl, {
         body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
           env.OAUTH_APP_CLIENT_SECRET
         }&refresh_token=${token.refreshToken}&scope=${encodeURIComponent(
@@ -73,14 +76,18 @@ export class TokenService {
         },
         method: 'post',
       });
+      
       this.logger.log('Status with refresh token: ' + respons.status);
+      
+      // Log response body for all non-200 responses to see error details
       if (respons.status != 200) {
-        try{
-          const json = await respons.text();
-          this.logger.error('Error with refresh token: ' + json);
-        }catch(e){}
+        const errorText = await respons.text();
+        this.logger.error(
+          `Token refresh failed with status ${respons.status}. Response: ${errorText}`,
+        );
         return undefined;
       }
+      
       const data = await respons.json();
       this.logger.log('Data with refresh token: ' + JSON.stringify(data));
       if (data) {
