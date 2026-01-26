@@ -82,9 +82,9 @@ export class TokenService {
       let respons = await fetch(`${this.getAuthorityUrl()}oauth2/v2.0/token`, {
         body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
           env.OAUTH_APP_CLIENT_SECRET
-        }&refresh_token=${token.refreshToken}&scopes='${env.OAUTH_SCOPES.split(
-          ' ',
-        )}'&grant_type=refresh_token&redirect_uri=${env.OAUTH_REDIRECT_URI}`,
+        }&refresh_token=${token.refreshToken}&scope=${encodeURIComponent(
+          env.OAUTH_SCOPES,
+        )}&grant_type=refresh_token&redirect_uri=${env.OAUTH_REDIRECT_URI}`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
