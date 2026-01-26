@@ -67,7 +67,7 @@ export class TokenService {
           env.OAUTH_APP_CLIENT_SECRET
         }&refresh_token=${token.refreshToken}&scope=${encodeURIComponent(
           env.OAUTH_SCOPES,
-        )}&grant_type=refresh_token&redirect_uri=${env.OAUTH_REDIRECT_URI}`,
+        )}&grant_type=refresh_token`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -76,8 +76,8 @@ export class TokenService {
       this.logger.log('Status with refresh token: ' + respons.status);
       if (respons.status != 200) {
         try{
-          const json = await respons.json();
-          this.logger.error('Error with refresh token: ' + JSON.stringify(json));
+          const json = await respons.text();
+          this.logger.error('Error with refresh token: ' + json);
         }catch(e){}
         return undefined;
       }
