@@ -32,37 +32,29 @@ export class TokenService {
     };
   }
 
-  async getToken(
-    token: Token,
-    needUserAzureId: boolean = false,
-  ): Promise<Token> {
-    const now = new Date();
-    const expDateUTC = new Date(token.expiresOn) || new Date();
-    if (now.getTime() < expDateUTC.getTime()) {
-      this.logger.log('Token is still valid');
-      return token;
-    }
-    this.logger.log('Token is not valid, refreshing...');
+  async getToken(token: Token): Promise<Token> {
+    this.logger.log('Refreshing token...');
 
     const data = await this.fetchToken(token);
     if (!data) {
       throw new UnauthorizedException('Ne morem osveziti zetona');
     }
+    const now = new Date();
     const expDate = new Date(now.getTime() + data.expires_in * 1000);
+
+    if (!token.user_azure_id) {
+      const user = await this.userService.getMe(data.access_token);
+      if (user) {
+        token.user_azure_id = user.id;
+      }
+    }
 
     const newtoken: Token = {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
       expiresOn: expDate.toString(),
-      user_azure_id: null,
+      user_azure_id: token.user_azure_id,
     };
-
-    if (needUserAzureId) {
-      const user = await this.userService.getMe(data.access_token);
-      if (user) {
-        newtoken.user_azure_id = user.id;
-      }
-    }
 
     return newtoken;
   }
@@ -158,6 +150,7 @@ export class TokenService {
     const signRefreshToken = await this.jwtService.signAsync(
       {
         refreshToken: token.refreshToken,
+        user_azure_id: token.user_azure_id,
       },
       {
         expiresIn: '30d',
@@ -172,25 +165,28 @@ export class TokenService {
   }
 
   async verifyToken(token: Token): Promise<Token> {
-    let accessToken = null;
-    try {
-      accessToken = await this.jwtService.verifyAsync(token.accessToken);
-    } catch (e) {}
-
     try {
       const refreshToken = await this.jwtService.verifyAsync(
         token.refreshToken,
       );
       return {
-        accessToken: accessToken?.accessToken,
+        accessToken: null,
         refreshToken: refreshToken.refreshToken,
-        expiresOn: accessToken !== null ? token.expiresOn : null,
-        user_azure_id: accessToken !== null ? accessToken.user_azure_id : null,
+        expiresOn: null,
+        user_azure_id: refreshToken.user_azure_id,
       };
     } catch (e) {
       console.log(e);
       return null;
     }
+  }
+
+  private expiresInCalculationAccessToken(accessToken: string): string {
+    const decodedToken = this.jwtService.decode(accessToken);
+    if (decodedToken) {
+      return decodedToken.exp.toString();
+    }
+    return null;
   }
 
   async verifyTokenFromCookie(jwt: string, token: string): Promise<Token> {

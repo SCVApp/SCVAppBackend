@@ -105,11 +105,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const verifyToken = await this.tokenService.verifyToken({
-      ...body,
+      accessToken: body.accessToken,
+      refreshToken: body.refreshToken,
+      expiresOn: body.expiresOn,
       user_azure_id: null,
     });
     if (verifyToken) {
-      const token = await this.tokenService.getToken(verifyToken, true);
+      const token = await this.tokenService.getToken(verifyToken);
       if (body.notificationToken) {
         //Dodajanje novega naprave v bazo ali posodabljanje tokena
         this.notificationService.addNewDevice(
