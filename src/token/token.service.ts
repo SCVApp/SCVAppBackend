@@ -75,6 +75,10 @@ export class TokenService {
       });
       this.logger.log('Status with refresh token: ' + respons.status);
       if (respons.status != 200) {
+        try{
+          const json = await respons.json();
+          this.logger.error('Error with refresh token: ' + JSON.stringify(json));
+        }catch(e){}
         return undefined;
       }
       const data = await respons.json();
