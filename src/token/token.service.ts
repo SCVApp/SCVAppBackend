@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CookieOptions, Response } from 'express';
 import fetch from 'node-fetch';
 import { env } from 'process';
+import { getAuthorityUrl } from 'src/application/clientApplication';
 import { UserService } from 'src/user/user.service';
 import { Token } from './token.class';
 
@@ -59,19 +60,9 @@ export class TokenService {
     return newtoken;
   }
 
-  private getAuthorityUrl(): string {
-    const baseAuthority =
-      env.OAUTH_AUTHORITY || 'https://login.microsoftonline.com/';
-    const tenantId = env.OAUTH_TENANT_ID;
-    const normalizedAuthority = baseAuthority.endsWith('/')
-      ? baseAuthority
-      : `${baseAuthority}/`;
-    return `${normalizedAuthority}${tenantId}/`;
-  }
-
   private async fetchToken(token: Token) {
     try {
-      let respons = await fetch(`${this.getAuthorityUrl()}oauth2/v2.0/token`, {
+      let respons = await fetch(`${getAuthorityUrl()}/oauth2/v2.0/token`, {
         body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
           env.OAUTH_APP_CLIENT_SECRET
         }&refresh_token=${token.refreshToken}&scope=${encodeURIComponent(

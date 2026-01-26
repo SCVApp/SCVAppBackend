@@ -1,12 +1,12 @@
-import { LogLevel, ConfidentialClientApplication } from '@azure/msal-node';
-import { env } from 'process';
+import { ConfidentialClientApplication, LogLevel } from '@azure/msal-node';
 import * as dotenv from 'dotenv';
+import { env } from 'process';
 
 dotenv.config();
 
 // Build authority URL with tenant ID
 // The authority URL is now tenant-specific: https://login.microsoftonline.com/{tenant-id}
-const getAuthorityUrl = (): string => {
+export const getAuthorityUrl = (): string => {
   const baseAuthority =
     env.OAUTH_AUTHORITY || 'https://login.microsoftonline.com/';
   const tenantId = env.OAUTH_TENANT_ID;
