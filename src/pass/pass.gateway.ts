@@ -23,9 +23,9 @@ export class PassGateway {
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     const doorCode: string =
-      client.handshake.headers['code'].toString() || null;
+      client.handshake.headers['code']?.toString() || null;
     const doorAccessSecret: string =
-      client.handshake.headers['secret'].toString() || null;
+      client.handshake.headers['secret']?.toString() || null;
 
     if (!doorCode || !doorAccessSecret) return client.disconnect();
     const doorPass = await this.passService.getDoorWithCode(doorCode);
