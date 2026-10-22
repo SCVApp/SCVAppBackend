@@ -22,7 +22,7 @@ export class LockersGateway {
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    const token = client.handshake.headers['token'].toString() || null;
+    const token = client.handshake.headers['token']?.toString() || null;
     if (!token) {
       client.disconnect();
       return;

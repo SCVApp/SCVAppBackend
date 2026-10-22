@@ -1,28 +1,30 @@
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
+
+# Bun installs dependencies; the Nest CLI build itself must run on Node,
+# because under Bun it does not rewrite 'src/...' imports to relative paths
+COPY --from=oven/bun:1.4.4-alpine /usr/local/bin/bun /usr/local/bin/bun
 
 RUN apk add g++ make py3-pip
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json bun.lock ./
 
-RUN npm ci
-
-RUN npm i -g @nestjs/cli
+RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN bun run build
 
 # Remove dev dependencies to prepare for production
-RUN npm prune --omit=dev
+RUN rm -rf node_modules && bun install --frozen-lockfile --production
 
 
-FROM node:22-alpine AS runner
+FROM oven/bun:1.4.4-alpine AS runner
 
 WORKDIR /app
 
-COPY --from=builder /app/package.json /app/package-lock.json ./
+COPY --from=builder /app/package.json /app/bun.lock ./
 
 # Copy already-built node_modules from builder (with dev deps removed)
 COPY --from=builder /app/node_modules ./node_modules
@@ -51,4 +53,4 @@ EXPOSE 5050
 
 ENV NODE_ENV=production
 
-CMD ["node" , "dist/main.js"]
+CMD ["bun", "dist/main.js"]
