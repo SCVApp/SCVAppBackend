@@ -1,4 +1,8 @@
-FROM oven/bun:1.4.4-alpine AS builder
+FROM node:24-alpine AS builder
+
+# Bun installs dependencies; the Nest CLI build itself must run on Node,
+# because under Bun it does not rewrite 'src/...' imports to relative paths
+COPY --from=oven/bun:1.4.4-alpine /usr/local/bin/bun /usr/local/bin/bun
 
 RUN apk add g++ make py3-pip
 
@@ -10,7 +14,7 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN bun --bun run build
+RUN bun run build
 
 # Remove dev dependencies to prepare for production
 RUN rm -rf node_modules && bun install --frozen-lockfile --production
