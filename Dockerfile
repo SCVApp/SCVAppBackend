@@ -10,14 +10,17 @@ WORKDIR /app
 
 COPY package.json bun.lock ./
 
-RUN bun install --frozen-lockfile
+# --ignore-scripts: the deprecated grpc package (pulled in by fcm-notification's
+# old firebase-admin, only used for Firestore) fails to compile on Node 24.
+# bcrypt ships prebuilt binaries, so no install scripts are needed.
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY . .
 
 RUN bun run build
 
 # Remove dev dependencies to prepare for production
-RUN rm -rf node_modules && bun install --frozen-lockfile --production
+RUN rm -rf node_modules && bun install --frozen-lockfile --production --ignore-scripts
 
 
 FROM oven/bun:1.4.4-alpine AS runner
