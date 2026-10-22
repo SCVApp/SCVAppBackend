@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CookieOptions, Response } from 'express';
 import fetch from 'node-fetch';
 import { env } from 'process';
+import { getAuthorityUrl } from 'src/application/clientApplication';
 import { UserService } from 'src/user/user.service';
 import { Token } from './token.class';
 
@@ -59,32 +60,29 @@ export class TokenService {
     return newtoken;
   }
 
-  private getAuthorityUrl(): string {
-    const baseAuthority =
-      env.OAUTH_AUTHORITY || 'https://login.microsoftonline.com/';
-    const tenantId = env.OAUTH_TENANT_ID;
-    const normalizedAuthority = baseAuthority.endsWith('/')
-      ? baseAuthority
-      : `${baseAuthority}/`;
-    return `${normalizedAuthority}${tenantId}/`;
-  }
-
   private async fetchToken(token: Token) {
     try {
-      let respons = await fetch(`${this.getAuthorityUrl()}oauth2/v2.0/token`, {
+      const tokenUrl = `${getAuthorityUrl()}/oauth2/v2.0/token`;
+      
+      let respons = await fetch(tokenUrl, {
         body: `client_id=${env.OAUTH_APP_ID}&client_secret=${
           env.OAUTH_APP_CLIENT_SECRET
         }&refresh_token=${token.refreshToken}&scope=${encodeURIComponent(
           env.OAUTH_SCOPES,
-        )}&grant_type=refresh_token&redirect_uri=${env.OAUTH_REDIRECT_URI}`,
+        )}&grant_type=refresh_token`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         method: 'post',
       });
+      
+      this.logger.log('Status with refresh token: ' + respons.status);
+      
+      // Log response body for all non-200 responses to see error details
       if (respons.status != 200) {
         return undefined;
       }
+      
       const data = await respons.json();
       if (data) {
         return data;
